@@ -1,0 +1,63 @@
+version: '3.9'
+
+networks:
+  hiperium-network:
+    driver: bridge
+
+services:
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    env_file:
+      - ./utils/docker/compose/localstack-dev.env
+    ports:
+      - "4566:4566"
+    volumes:
+      - ./src/city-tasks-api/utils/docker/dynamodb/items/devices.json:/var/lib/localstack/devices.json
+      - ./src/city-tasks-api/utils/docker/dynamodb/scripts/create-resources.sh:/etc/localstack/init/ready.d/create-resources.sh
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - hiperium-network
+
+  tasks-postgres:
+    image: postgres:14.4
+    container_name: tasks-postgres
+    environment:
+      - POSTGRES_DB=CityTasksDB
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres123
+    ports:
+      - "5432:5432"
+    networks:
+      - hiperium-network
+
+  tasks-api:
+    image: aosolorzano/city-tasks-api:1.6.0
+    container_name: tasks-api
+    build:
+      context: ./src/city-tasks-api
+      dockerfile: Dockerfile
+    env_file:
+      - ./src/city-tasks-api/utils/docker/env/tasks-api-dev.env
+    depends_on:
+      - localstack
+      - tasks-postgres
+    ports:
+      - "8080:8080"
+    networks:
+      - hiperium-network
+
+  tasks-proxy:
+    image: aosolorzano/city-tasks-proxy:1.0.0
+    container_name: tasks-proxy
+    build:
+      context: ./src/city-tasks-api
+      dockerfile: ./utils/docker/envoy/Dockerfile
+      args:
+        envoy_env: dev
+    depends_on:
+      - tasks-api
+    ports:
+      - "443:443"
+    networks:
+      - hiperium-network

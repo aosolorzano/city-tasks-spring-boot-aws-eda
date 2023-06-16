@@ -33,7 +33,7 @@ sed -i'.bak' -e "s/server_domain_name/$server_domain_name/g; s/server_fqdn/$serv
 rm -f "$WORKING_DIR"/src/city-tasks-api/copilot/api/manifest.yml.bak
 
 ### ASKING TO STORE ALB ACCESS-LOGS
-sh "$WORKING_DIR"/utils/scripts/helper/create-alb-logs-s3-bucket.sh
+sh "$WORKING_DIR"/utils/scripts/helper/0_a_create-s3-bucket-for-alb-logs.sh
 
 ### ASKING TO PRUNE DOCKER SYSTEM
 read -r -p "Do you want to prune your docker system? [y/N] " response
@@ -138,9 +138,21 @@ alb_domain_name=$(aws cloudformation describe-stacks --stack-name city-tasks-"$A
   --query "Stacks[0].Outputs[?OutputKey=='PublicLoadBalancerDNSName'].OutputValue" \
   --output text \
   --profile "$AWS_WORKLOADS_PROFILE")
-echo "ALB Domain Name: $alb_domain_name"
+echo "$alb_domain_name"
 
+### ASKING TO REGISTER ALB DOMAIN NAME ON ROUTE53
 echo ""
-echo "IMPORTANT!!: Create a new CNAME record in your Route53 Hosted Zone for your ALB Domain Name."
+read -r -p "Do you want to <register> the ALB domain name on Route53? [Y/n] " register_alb_domain_name
+if [ "$register_alb_domain_name" ]; then
+  read -r -p "Do you want to <Update> an existing Record Set? [Y/n] " update_record_set
+  if [ "$update_record_set" ]; then
+    export UPDATE_RECORD_SET="true"
+  else
+    export UPDATE_RECORD_SET="false"
+  fi
+  export SERVER_DOMAIN_NAME="$server_domain_name"
+  export ALB_DOMAIN_NAME="$alb_domain_name"
+  sh "$WORKING_DIR"/utils/scripts/helper/5_6_register-alb-domain-in-route53.sh
+fi
 echo ""
 echo "DONE!"

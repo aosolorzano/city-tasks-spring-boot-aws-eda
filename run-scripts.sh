@@ -61,6 +61,8 @@ helperMenu() {
     2) Prune Docker System.
     3) Create Self-Signed Certificate.
     4) Import Self-Signed Certificate to ACM.
+    5) Create Record Set in Route53.
+    6) Update Record Set in Route53.
     -------------------------------------
     r) Return.
     q) Quit.
@@ -88,6 +90,18 @@ helperMenu() {
   4)
     clear
     sh "$WORKING_DIR"/utils/scripts/helper/4_import-tls-certificate-to-acm.sh
+    helperMenu
+    ;;
+  5)
+    clear
+    export UPDATE_RECORD_SET="false"
+    sh "$WORKING_DIR"/utils/scripts/helper/5_6_register-alb-domain-in-route53.sh
+    helperMenu
+    ;;
+  6)
+    clear
+    export UPDATE_RECORD_SET="true"
+    sh "$WORKING_DIR"/utils/scripts/helper/5_6_register-alb-domain-in-route53.sh
     helperMenu
     ;;
   [Rr])
@@ -118,7 +132,7 @@ menu() {
     2) Create Backend on AWS.
     3) Delete Backend on AWS.
     -------------------------------------
-    h) Helper scripts.
+    h) Helper menu.
     q) Quit.
   "
   read -r -p 'Choose an option: ' option

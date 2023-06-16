@@ -9,6 +9,8 @@ TEMPLATE_DIR="$WORKING_DIR"/utils/templates
 cat "$TEMPLATE_DIR"/copilot/api/manifest.yml                      > "$WORKING_DIR"/src/city-tasks-api/copilot/api/manifest.yml
 cat "$TEMPLATE_DIR"/copilot/env/"$AWS_WORKLOADS_ENV"/manifest.yml > "$WORKING_DIR"/src/city-tasks-api/copilot/environments/"$AWS_WORKLOADS_ENV"/manifest.yml
 cat "$TEMPLATE_DIR"/iam/s3-alb-access-logs-policy.json            > "$WORKING_DIR"/src/city-tasks-api/utils/aws/iam/s3-alb-access-logs-policy.json
+cat "$TEMPLATE_DIR"/route53/tasks-api-save-alb-record-set.json    > "$WORKING_DIR"/src/city-tasks-api/utils/aws/route53/tasks-api-save-alb-record-set.json
+cat "$TEMPLATE_DIR"/route53/tasks-api-delete-alb-record-set.json  > "$WORKING_DIR"/src/city-tasks-api/utils/aws/route53/tasks-api-delete-alb-record-set.json
 cat "$TEMPLATE_DIR"/docker/env/tasks-api-dev.env                  > "$WORKING_DIR"/src/city-tasks-api/utils/docker/env/tasks-api-dev.env
 cat "$TEMPLATE_DIR"/docker/envoy/envoy-https-http.yaml            > "$WORKING_DIR"/src/city-tasks-api/utils/docker/envoy/envoy.yaml
 

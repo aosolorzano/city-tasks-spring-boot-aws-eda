@@ -3,28 +3,30 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.7</version>
-        <relativePath/>
+        <groupId>com.hiperium.city</groupId>
+        <artifactId>city-tasks-parent</artifactId>
+        <version>1.6.0</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
-    <groupId>com.hiperium.city</groupId>
     <artifactId>city-tasks-api</artifactId>
     <name>city-tasks-api</name>
-    <version>1.6.0</version>
-    <description>Spring Boot Native and Reactive microservice using AWS Copilot CLI to configure an Event-Driven Architecture.</description>
+    <description>Spring Boot Native and Reactive micro-service that creates Quartz Jobs.</description>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>17</java.version>
+        <hibernate.version>6.2.5.Final</hibernate.version>
         <aws.java.sdk.version>2.20.59</aws.java.sdk.version>
         <testcontainers.version>1.18.1</testcontainers.version>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>3.1.1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>software.amazon.awssdk</groupId>
                 <artifactId>bom</artifactId>

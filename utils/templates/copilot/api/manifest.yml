@@ -67,11 +67,6 @@ network:
   vpc:
     placement: 'private'
 
-# Publishes messages to SNS Topic for EDA.
-publish:
-  topics:
-    - name: tasksTopic
-
 # Environment Variables.
 variables:
   CITY_TASKS_TIME_ZONE: -05:00

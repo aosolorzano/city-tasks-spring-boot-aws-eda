@@ -1,16 +1,20 @@
 package com.hiperium.city.tasks.api.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.ZonedDateTime;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ErrorDetailsDto {
 
-    public final ZonedDateTime errorDate;
-    public final String requestedPath;
-    public final String errorMessage;
-    public final String errorCode;
+    private ZonedDateTime errorDate;
+    private String requestedPath;
+    private String errorMessage;
+    private String errorCode;
 }

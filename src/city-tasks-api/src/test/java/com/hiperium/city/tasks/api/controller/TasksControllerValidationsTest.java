@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 @AutoConfigureWebTestClient
 @TestPropertySource(locations = "classpath:application-test.properties")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class TaskSControllerValidationsTest extends AbstractContainerBaseTest {
+class TasksControllerValidationsTest extends AbstractContainerBaseTest {
 
     @Autowired
     private WebTestClient webTestClient;

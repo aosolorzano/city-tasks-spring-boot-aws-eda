@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="LogInJSON" target="SYSTEM_OUT">
+            <JsonLayout compact="false" eventEol="true" stacktraceAsString="true">
+                <KeyValuePair key="appName" value="city-tasks-parent" />
+                <KeyValuePair key="version" value="1.6.0" />
+            </JsonLayout>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="com.hiperium.city.tasks.events" level="debug" additivity="false">
+            <AppenderRef ref="LogInJSON"/>
+        </Logger>
+        <Root level="error">
+            <AppenderRef ref="LogInJSON"/>
+        </Root>
+    </Loggers>
+</Configuration>

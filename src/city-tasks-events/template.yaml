@@ -5,7 +5,7 @@ Description: SAM Template for the City Tasks Events project.
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    Timeout: 20
+    Timeout: 5
     MemorySize: 512
 
 Resources:
@@ -13,27 +13,28 @@ Resources:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       CodeUri: CityTasksEventsFunction
-      Handler: com.hiperium.city.tasks.events.App::handleRequest
+      Handler: com.hiperium.city.tasks.events.ApplicationHandler::handleRequest
       Runtime: java17
       Architectures:
         - arm64
-      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+      Environment:
         Variables:
-          PARAM1: VALUE
+          POWERTOOLS_LOG_LEVEL: DEBUG
+          POWERTOOLS_SERVICE_NAME: CityTasksEvents
       Events:
-        HelloWorld:
-          Type: EventBridgeRule # More info about EventBridgeRule AwsEvent Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#eventbridgerule
+        TaskExecutionTrigger:
+          Type: EventBridgeRule # More info about EventBridgeRule EventBridgeCustomEvent Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#eventbridgerule
           Properties:
             Pattern:
               source:
-                - aws.ec2
+                - com.hiperium.city.tasks
               detail-type:
-                - EC2 Instance State-change TaskExecutionDetail
+                - TaskExecution
 
 Outputs:
   CityTasksEventsFunction:
-    Description: "Hello World Lambda Function ARN"
+    Description: "CityTasksEvents Lambda Function ARN."
     Value: !GetAtt CityTasksEventsFunction.Arn
-  HelloWorldFunctionIamRole:
-    Description: "Implicit IAM Role created for Hello World function"
-    Value: !GetAtt HelloWorldFunctionRole.Arn
+  CityTasksEventsFunctionRole:
+    Description: "Implicit IAM Role created for the CityTasksEvents function."
+    Value: !GetAtt CityTasksEventsFunctionRole.Arn

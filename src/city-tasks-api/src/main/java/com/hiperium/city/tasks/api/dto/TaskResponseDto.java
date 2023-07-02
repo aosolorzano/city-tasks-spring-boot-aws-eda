@@ -13,7 +13,7 @@ import java.time.ZonedDateTime;
 @AllArgsConstructor
 public class TaskResponseDto {
 
-        private ZonedDateTime date;
+    private ZonedDateTime date;
 
-        private TaskDto task;
+    private TaskDto task;
 }

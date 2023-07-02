@@ -1,4 +1,4 @@
-# city-tasks-awsEvent
+# city-tasks-eventBridgeEvent
 
 This project contains source code and supporting files for a serverless application that you can deploy with the SAM CLI. It includes the following files and folders.
 
@@ -7,7 +7,7 @@ This project contains source code and supporting files for a serverless applicat
 - events        - Invocation events that you can use to invoke the function.
 - template.yaml - A template that defines the application's AWS resources.
 
-This application reacts to EC2 Instance State change events, demonstrating the power of awsEvent-driven development with Amazon EventBridge.
+This application reacts to EC2 Instance State change events, demonstrating the power of eventBridgeEvent-driven development with Amazon EventBridge.
 
 The application uses several AWS resources, including Lambda functions and an EventBridge Rule. These resources are defined in the `template.yaml` file in this project. You can update the template to add AWS resources through the same deployment process that updates your application code.
 
@@ -56,7 +56,7 @@ To deploy the application, use the `sam deploy` command.
 ```bash
 sam deploy \
     --template-file packaged.yaml \
-    --stack-name city-tasks-awsEvent \
+    --stack-name city-tasks-eventBridgeEvent \
     --capabilities CAPABILITY_IAM
 ```
 
@@ -68,24 +68,24 @@ sam build
 
 The SAM CLI installs dependencies defined in `HelloWorldFunction/pom.xml`, creates a deployment package, and saves it in the `.aws-sam/build` folder.
 
-Test a single function by invoking it directly with a test awsEvent. An awsEvent is a JSON document that represents the input that the function receives from the awsEvent source. Test events are included in the `events` folder in this project.
+Test a single function by invoking it directly with a test eventBridgeEvent. An eventBridgeEvent is a JSON document that represents the input that the function receives from the eventBridgeEvent source. Test events are included in the `events` folder in this project.
 
 Run functions locally and invoke them with the `sam local invoke` command.
 ```bash
-sam local invoke HelloWorldFunction --awsEvent events/awsEvent.json
+sam local invoke HelloWorldFunction --eventBridgeEvent events/eventBridgeEvent.json
 ```
 
 The SAM CLI reads the application template to determine the EventBridge rule pattern and the functions that they invoke as a target. The `Events` property on each function's definition includes the source and detail-type of the types of events that will invoke the function.
 ```yaml
       Events:
         HelloWorld:
-          Type: EventBridgeRule # More info about EventBridgeRule AwsEvent Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#eventbridgerule
+          Type: EventBridgeRule # More info about EventBridgeRule EventBridgeCustomEvent Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#eventbridgerule
           Properties:
             Pattern:
               source:
                 - aws.ec2
               detail-type:
-                - EC2 Instance State-change TaskExecutionDetail
+                - EC2 Instance State-change TaskEventDetail
 ```
 
 ## Add a resource to your application
@@ -98,7 +98,7 @@ To simplify troubleshooting, SAM CLI has a command called `sam logs`. `sam logs`
 `NOTE`: This command works for all AWS Lambda functions; not just the ones you deploy using SAM.
 
 ```bash
-sam logs -n HelloWorldFunction --stack-name city-tasks-awsEvent --tail
+sam logs -n HelloWorldFunction --stack-name city-tasks-eventBridgeEvent --tail
 ```
 
 You can find more information and examples about filtering Lambda function logs in the [SAM CLI Documentation](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-logging.html).
@@ -112,7 +112,7 @@ mvn test
 ## Cleanup
 To delete the sample application and the bucket that you created, use the SAM CLI and AWS CLI.
 ```bash
-sam delete --stack-name city-tasks-awsEvent
+sam delete --stack-name city-tasks-eventBridgeEvent
 aws s3 rb s3://BUCKET_NAME
 ```
 

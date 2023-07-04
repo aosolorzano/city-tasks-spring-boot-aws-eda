@@ -12,7 +12,7 @@ Resources:
   CityTasksEventsFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      CodeUri: CityTasksEventsFunction
+      CodeUri: target/city-tasks-events-1.6.0.jar
       Handler: com.hiperium.city.tasks.events.ApplicationHandler::handleRequest
       Runtime: java17
       Architectures:

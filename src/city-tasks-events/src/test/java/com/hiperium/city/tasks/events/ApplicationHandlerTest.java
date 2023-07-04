@@ -1,11 +1,10 @@
 package com.hiperium.city.tasks.events;
 
+import com.hiperium.city.tasks.events.ApplicationHandler;
 import com.hiperium.city.tasks.events.model.EventBridgeCustomEvent;
 import com.hiperium.city.tasks.events.utils.FunctionUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,8 +15,6 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle;
 @TestInstance(Lifecycle.PER_CLASS)
 @TestMethodOrder(OrderAnnotation.class)
 class ApplicationHandlerTest {
-
-    private static final Logger LOGGER = LogManager.getLogger(ApplicationHandlerTest.class);
 
     @BeforeAll
     static void init() {
@@ -36,7 +33,6 @@ class ApplicationHandlerTest {
     @Test
     @Order(2)
     void mustValidateEventObjectTest() {
-        LOGGER.info("mustUnmarshallEventFromInputStreamTest() - START");
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream("events/valid-event.json");
         assertNotNull(inputStream);
         EventBridgeCustomEvent event = FunctionUtil.unmarshal(inputStream, EventBridgeCustomEvent.class);
@@ -46,7 +42,16 @@ class ApplicationHandlerTest {
 
     @Test
     @Order(3)
-    void mustHandleEventWithInvalidDetailTest() throws IOException {
+    void givenValidEvent_whenInvokeLambdaFunction_thenExecuteSuccessfully() throws IOException {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("events/valid-event.json")) {
+            ApplicationHandler handler = new ApplicationHandler();
+            assertDoesNotThrow(() -> handler.handleRequest(inputStream, null, null));
+        }
+    }
+
+    @Test
+    @Order(4)
+    void givenEventWithInvalidDetail_whenInvokeLambdaFunction_thenThrowError() throws IOException {
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("events/invalid-event-detail.json")) {
             ApplicationHandler handler = new ApplicationHandler();
             IllegalArgumentException expectedException = assertThrows(IllegalArgumentException.class,
@@ -56,8 +61,8 @@ class ApplicationHandlerTest {
     }
 
     @Test
-    @Order(4)
-    void mustHandleEventWithoutDetailTest() throws IOException {
+    @Order(5)
+    void givenEventWithoutDetail_whenInvokeLambdaFunction_thenThrowError() throws IOException {
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("events/event-without-detail.json")) {
             ApplicationHandler handler = new ApplicationHandler();
             IllegalArgumentException expectedException = assertThrows(IllegalArgumentException.class,

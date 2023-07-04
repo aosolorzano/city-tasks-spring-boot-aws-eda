@@ -40,7 +40,7 @@ public final class FunctionUtil {
             jsonSchema = getJsonSchema(CUSTOM_EVENT_SCHEMA_JSON, true);
         } catch (IllegalArgumentException e) {
             LOGGER.error(ILLEGAL_SCHEMA_MESSAGE, e.getMessage());
-            throw new IllegalStateException(ILLEGAL_STATE_MESSAGE);
+            throw new IllegalStateException(ILLEGAL_STATE_MESSAGE, e);
         }
     }
 

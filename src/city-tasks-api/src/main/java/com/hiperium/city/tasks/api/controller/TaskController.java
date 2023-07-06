@@ -44,7 +44,7 @@ public class TaskController {
         }).map(this::getResponseDto);
     }
 
-    @GetMapping("/getTemplate")
+    @GetMapping("/template")
     @ResponseStatus(HttpStatus.OK)
     public TaskOperationDto getTaskOperationTemplate() {
         return TaskUtil.getTaskOperationTemplate();

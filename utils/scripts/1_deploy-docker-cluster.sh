@@ -7,7 +7,7 @@ cd "$WORKING_DIR" || {
 
 ### VERIFY CA AND CSR CERTIFICATES FILES
 CA_CERTS_DIR="$WORKING_DIR"/utils/certs
-TASKS_CERTS_DIR="$WORKING_DIR"/src/city-tasks-api/utils/certs/"$AWS_WORKLOADS_ENV"
+TASKS_CERTS_DIR="$WORKING_DIR"/utils/certs/"$AWS_WORKLOADS_ENV"
 if [ ! -f "$CA_CERTS_DIR"/ca-cert.pem ] || [ ! -f "$TASKS_CERTS_DIR"/server-key.pem ] || [ ! -f "$TASKS_CERTS_DIR"/server-cert-"$AWS_WORKLOADS_ENV".pem ]; then
   echo ""
   echo "Error: Not TLS certificates was found for the '$AWS_WORKLOADS_ENV' environment."
@@ -35,10 +35,18 @@ case $response in
     ;;
 esac
 
+### GENERATE LAMBDA FUNCTION JAR
+echo ""
+echo "GENERATING LAMBDA FUNCTION JAR..."
+echo ""
+mvn clean package -DskipTests -f "$WORKING_DIR"/src/city-tasks-events/pom.xml
+echo ""
+echo "DONE!"
+
 ### UPDATE ENVOY CONFIGURATION FILE WITH SERVER FQDN
 sed -i'.bak' -e "s/server_fqdn/$server_fqdn/g;" \
-      "$WORKING_DIR"/src/city-tasks-api/utils/docker/envoy/envoy.yaml
-rm -f "$WORKING_DIR"/src/city-tasks-api/utils/docker/envoy/envoy.yaml.bak
+      "$WORKING_DIR"/src/city-tasks-proxy/envoy.yaml
+rm -f "$WORKING_DIR"/src/city-tasks-proxy/envoy.yaml.bak
 
 echo ""
 echo "GETTING INFORMATION FROM AWS. PLEASE WAIT..."
@@ -56,8 +64,8 @@ fi
 ### UPDATING DOCKER COMPOSE ENVIRONMENT FILE
 idp_aws_region=$(aws configure get region --profile "$AWS_IDP_PROFILE")
 sed -i'.bak' -e "s/idp_aws_region/$idp_aws_region/g; s/cognito_user_pool_id/$cognito_user_pool_id/g"  \
-      "$WORKING_DIR"/src/city-tasks-api/utils/docker/env/tasks-api-dev.env
-rm -f "$WORKING_DIR"/src/city-tasks-api/utils/docker/env/tasks-api-dev.env.bak
+      "$WORKING_DIR"/utils/docker/env/tasks-api-dev.env
+rm -f "$WORKING_DIR"/utils/docker/env/tasks-api-dev.env.bak
 
 ### STARTING DOCKER CLUSTER
 echo ""

@@ -22,17 +22,17 @@ if [ "$create_s3_bucket" == "Y" ] || [ "$create_s3_bucket" == "y" ] || [ "$creat
   ### UPDATING S3 BUCKET POLICY FILE
   workloads_account_id=$(aws configure get sso_account_id --profile "$AWS_WORKLOADS_PROFILE")
   sed -i'.bak' -e "s/aws_account_id/$workloads_account_id/g; s/bucket_name/$s3_bucket_name/g" \
-        "$WORKING_DIR"/src/city-tasks-api/utils/aws/iam/s3-alb-access-logs-policy.json
-  rm -f "$WORKING_DIR"/src/city-tasks-api/utils/aws/iam/s3-alb-access-logs-policy.json.bak
+        "$WORKING_DIR"/utils/aws/iam/s3-alb-access-logs-policy.json
+  rm -f "$WORKING_DIR"/utils/aws/iam/s3-alb-access-logs-policy.json.bak
 
   ### ASSIGNING S3 BUCKET POLICY
   aws s3api put-bucket-policy               \
       --bucket "$s3_bucket_name"            \
-      --policy file://"$WORKING_DIR"/src/city-tasks-api/utils/aws/iam/s3-alb-access-logs-policy.json \
+      --policy file://"$WORKING_DIR"/utils/aws/iam/s3-alb-access-logs-policy.json \
       --profile "$AWS_WORKLOADS_PROFILE"
 
   ### REVERTING S3 BUCKET POLICY FILE
-  cat "$WORKING_DIR"/utils/templates/iam/s3-alb-access-logs-policy.json > "$WORKING_DIR"/src/city-tasks-api/utils/aws/iam/s3-alb-access-logs-policy.json
+  cat "$WORKING_DIR"/utils/templates/iam/s3-alb-access-logs-policy.json > "$WORKING_DIR"/utils/aws/iam/s3-alb-access-logs-policy.json
   echo "DONE!"
 else
   read -r -p 'Enter the existing <S3 Bucket> name: [city-tasks-alb-dev]' s3_bucket_name
@@ -43,5 +43,5 @@ fi
 
 ### UPDATING ENVIRONMENT MANIFEST FILE
 sed -i'.bak' -e "s/s3_bucket_name/$s3_bucket_name/g" \
-      "$WORKING_DIR"/src/city-tasks-api/copilot/environments/"$AWS_WORKLOADS_ENV"/manifest.yml
-rm -f "$WORKING_DIR"/src/city-tasks-api/copilot/environments/"$AWS_WORKLOADS_ENV"/manifest.yml.bak
+      "$WORKING_DIR"/copilot/environments/"$AWS_WORKLOADS_ENV"/manifest.yml
+rm -f "$WORKING_DIR"/copilot/environments/"$AWS_WORKLOADS_ENV"/manifest.yml.bak

@@ -1,20 +1,17 @@
 version: '3.9'
 
-networks:
-  hiperium-network:
-    driver: bridge
-
 services:
-  localstack:
+  tasks-localstack:
     image: localstack/localstack:latest
-    container_name: localstack
+    container_name: tasks-localstack
     env_file:
-      - ./utils/docker/compose/localstack-dev.env
+      - ./utils/docker/env/localstack-dev.env
     ports:
       - "4566:4566"
     volumes:
-      - ./src/city-tasks-api/utils/docker/dynamodb/items/devices.json:/var/lib/localstack/devices.json
-      - ./src/city-tasks-api/utils/docker/dynamodb/scripts/create-resources.sh:/etc/localstack/init/ready.d/create-resources.sh
+      - ./src/city-tasks-events/target/city-tasks-events-1.6.0.jar:/var/lib/localstack/city-tasks-events-1.6.0.jar
+      - ./utils/docker/localstack/dynamodb/devices.json:/var/lib/localstack/devices.json
+      - ./utils/docker/localstack/resources.sh:/etc/localstack/init/ready.d/resources-setup.sh
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - hiperium-network
@@ -35,12 +32,12 @@ services:
     image: aosolorzano/city-tasks-api:1.6.0
     container_name: tasks-api
     build:
-      context: ./src/city-tasks-api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: src/city-tasks-api/Dockerfile
     env_file:
-      - ./src/city-tasks-api/utils/docker/env/tasks-api-dev.env
+      - ./utils/docker/env/tasks-api-dev.env
     depends_on:
-      - localstack
+      - tasks-localstack
       - tasks-postgres
     ports:
       - "8080:8080"
@@ -48,11 +45,11 @@ services:
       - hiperium-network
 
   tasks-proxy:
-    image: aosolorzano/city-tasks-proxy:1.0.0
+    image: aosolorzano/city-tasks-proxy:1.6.0
     container_name: tasks-proxy
     build:
-      context: ./src/city-tasks-api
-      dockerfile: ./utils/docker/envoy/Dockerfile
+      context: .
+      dockerfile: src/city-tasks-proxy/Dockerfile
       args:
         envoy_env: dev
     depends_on:
@@ -61,3 +58,7 @@ services:
       - "443:443"
     networks:
       - hiperium-network
+
+networks:
+  hiperium-network:
+    driver: bridge

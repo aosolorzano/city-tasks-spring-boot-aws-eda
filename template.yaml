@@ -12,7 +12,8 @@ Resources:
   CityTasksEventsFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      CodeUri: target/city-tasks-events-1.6.0.jar
+      FunctionName: city-tasks-events
+      CodeUri: ./src/city-tasks-events/target/city-tasks-events-1.6.0.jar
       Handler: com.hiperium.city.tasks.events.ApplicationHandler::handleRequest
       Runtime: java17
       Architectures:
@@ -20,7 +21,6 @@ Resources:
       Environment:
         Variables:
           POWERTOOLS_LOG_LEVEL: DEBUG
-          POWERTOOLS_SERVICE_NAME: CityTasksEvents
       Events:
         TaskExecutionTrigger:
           Type: EventBridgeRule # More info about EventBridgeRule EventBridgeCustomEvent Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#eventbridgerule

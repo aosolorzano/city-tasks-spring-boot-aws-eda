@@ -15,14 +15,11 @@ import java.net.URISyntaxException;
 
 public abstract class AbstractContainerBaseTest {
 
-    private static final String JAVA_RUNTIME = "java17";
-    private static final String HANDLER = "com.hiperium.city.tasks.events.ApplicationHandler::handleRequest";
-    private static final String CONTAINER_JAR_PATH = "/tmp/localstack/city-tasks-events-1.6.0.jar";
-
     protected static final String FUNCTION_NAME = "city-tasks-events";
     protected static final LocalStackContainer LOCALSTACK_CONTAINER;
     protected static LambdaClient lambdaClient;
 
+    public static final String CONTAINER_JAR_PATH = "/tmp/localstack/city-tasks-events-1.6.0.jar";
 
     static {
         LOCALSTACK_CONTAINER = new LocalStackContainer(DockerImageName.parse("localstack/localstack:latest"))
@@ -38,8 +35,8 @@ public abstract class AbstractContainerBaseTest {
         Container.ExecResult lambdaCreation = LOCALSTACK_CONTAINER.execInContainer(
                 "awslocal", "lambda", "create-function",
                 "--function-name", FUNCTION_NAME,
-                "--runtime", JAVA_RUNTIME,
-                "--handler", HANDLER,
+                "--runtime", "java17",
+                "--handler", "com.hiperium.city.tasks.events.ApplicationHandler::handleRequest",
                 "--region", LOCALSTACK_CONTAINER.getRegion(),
                 "--role", "arn:aws:iam::000000000000:role/test",
                 "--zip-file", "fileb://" + CONTAINER_JAR_PATH,

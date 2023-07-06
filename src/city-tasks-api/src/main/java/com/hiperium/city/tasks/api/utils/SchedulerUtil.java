@@ -36,12 +36,12 @@ public final class SchedulerUtil {
                                 getIntValuesFromExecutionDays(task.getExecutionDays()))
                         .inTimeZone(TimeZone.getTimeZone(ZoneId.of(timeZone))));
         if (Objects.nonNull(task.getExecuteUntil())) {
-            java.util.Calendar executeUntilCalendar = java.util.Calendar.getInstance(TimeZone.getTimeZone(ZoneId.of(timeZone)));
-            executeUntilCalendar.set(java.util.Calendar.YEAR, task.getExecuteUntil().getYear());
-            executeUntilCalendar.set(java.util.Calendar.MONTH, task.getExecuteUntil().getMonthValue() - 1);
-            executeUntilCalendar.set(java.util.Calendar.DAY_OF_MONTH, task.getExecuteUntil().getDayOfMonth());
-            executeUntilCalendar.set(java.util.Calendar.HOUR_OF_DAY, 23);
-            executeUntilCalendar.set(java.util.Calendar.MINUTE, 59);
+            Calendar executeUntilCalendar = Calendar.getInstance(TimeZone.getTimeZone(ZoneId.of(timeZone)));
+            executeUntilCalendar.set(Calendar.YEAR, task.getExecuteUntil().getYear());
+            executeUntilCalendar.set(Calendar.MONTH, task.getExecuteUntil().getMonthValue() - 1);
+            executeUntilCalendar.set(Calendar.DAY_OF_MONTH, task.getExecuteUntil().getDayOfMonth());
+            executeUntilCalendar.set(Calendar.HOUR_OF_DAY, 23);
+            executeUntilCalendar.set(Calendar.MINUTE, 59);
             executeUntilCalendar.set(Calendar.SECOND, 59);
             // TODO: Fix the error: "java.lang.IllegalArgumentException: End time cannot be before start time"
             triggerBuilder.endAt(executeUntilCalendar.getTime());

@@ -62,8 +62,8 @@ openssl x509 -req -sha256       \
   -CAcreateserial
 
 ### MOVING CERTIFICATE FILES TO THE CORRESPONDING DIRECTORY
-cp ca-cert.pem "$WORKING_DIR"/src/city-tasks-api/utils/certs
-cp server-key-no-header.pem "$WORKING_DIR"/src/city-tasks-api/utils/certs/"$AWS_WORKLOADS_ENV"/server-key.pem
-mv server-cert-"$AWS_WORKLOADS_ENV".pem ca-cert.srl "$WORKING_DIR"/src/city-tasks-api/utils/certs/"$AWS_WORKLOADS_ENV"
+cp ca-cert.pem "$WORKING_DIR"/utils/certs
+cp server-key-no-header.pem "$WORKING_DIR"/utils/certs/"$AWS_WORKLOADS_ENV"/server-key.pem
+mv server-cert-"$AWS_WORKLOADS_ENV".pem ca-cert.srl "$WORKING_DIR"/utils/certs/"$AWS_WORKLOADS_ENV"
 echo ""
 echo "DONE!"

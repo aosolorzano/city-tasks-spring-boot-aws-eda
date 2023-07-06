@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd "$WORKING_DIR"/src/city-tasks-api/utils/certs/"$AWS_WORKLOADS_ENV" || {
+cd "$WORKING_DIR"/utils/certs/"$AWS_WORKLOADS_ENV" || {
   echo "Error moving to the '$AWS_WORKLOADS_ENV' Certification's directory."
   exit 1
 }

@@ -8,7 +8,6 @@ import com.hiperium.city.tasks.api.utils.DeviceUtil;
 import com.hiperium.city.tasks.api.utils.TaskUtil;
 import com.hiperium.city.tasks.api.utils.enums.EnumDeviceOperation;
 import com.hiperium.city.tasks.api.utils.enums.EnumDeviceStatus;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,6 +27,8 @@ import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
 
 import java.net.URI;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Fail.fail;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
 @ActiveProfiles("test")
@@ -83,9 +84,9 @@ class DeviceRepositoryTest extends AbstractContainerBaseTest {
                 WaiterResponse<DescribeTableResponse> waiterResponse = dbWaiter.waitUntilTableExists(tableRequest);
                 waiterResponse.matched().response().ifPresent(System.out::println);
                 String newTable = response.tableDescription().tableName();
-                Assertions.assertThat(newTable).isEqualTo(Device.TABLE_NAME);
+                assertThat(newTable).isEqualTo(Device.TABLE_NAME);
             } catch (DynamoDbException e) {
-                Assertions.fail(e.getMessage());
+                fail(e.getMessage());
                 throw e;
             }
         }
@@ -103,8 +104,8 @@ class DeviceRepositoryTest extends AbstractContainerBaseTest {
                 this.dynamoDbAsyncClient.putItem(DeviceUtil.putDeviceRequest(device)));
         StepVerifier.create(putItemResponseMono)
                 .assertNext(putItemResponse -> {
-                    Assertions.assertThat(putItemResponse).isNotNull();
-                    Assertions.assertThat(putItemResponse.sdkHttpResponse().isSuccessful()).isTrue();
+                    assertThat(putItemResponse).isNotNull();
+                    assertThat(putItemResponse.sdkHttpResponse().isSuccessful()).isTrue();
                 })
                 .verifyComplete();
     }
@@ -116,11 +117,11 @@ class DeviceRepositoryTest extends AbstractContainerBaseTest {
         Mono<Device> deviceMonoResponse = this.deviceRepository.findById(DEVICE_ID);
         StepVerifier.create(deviceMonoResponse)
                 .assertNext(device -> {
-                    Assertions.assertThat(device).isNotNull();
-                    Assertions.assertThat(device.getId()).isEqualTo(DEVICE_ID);
-                    Assertions.assertThat(device.getName()).isEqualTo("Device 1");
-                    Assertions.assertThat(device.getDescription()).isEqualTo("Device 1 Description");
-                    Assertions.assertThat(device.getStatus()).isEqualTo(EnumDeviceStatus.ON);
+                    assertThat(device).isNotNull();
+                    assertThat(device.getId()).isEqualTo(DEVICE_ID);
+                    assertThat(device.getName()).isEqualTo("Device 1");
+                    assertThat(device.getDescription()).isEqualTo("Device 1 Description");
+                    assertThat(device.getStatus()).isEqualTo(EnumDeviceStatus.ON);
                 })
                 .verifyComplete();
     }
@@ -140,19 +141,23 @@ class DeviceRepositoryTest extends AbstractContainerBaseTest {
     @DisplayName("Turn Device OFF")
     void givenDeviceItem_whenTaskTurnedOff_mustUpdateDeviceStatus() {
         task.setDeviceOperation(EnumDeviceOperation.DEACTIVATE);
-        Mono<Boolean> deviceUpdateResponse = this.deviceRepository.updateStatusByTaskOperation(task);
+        Mono<Task> deviceUpdateResponse = this.deviceRepository.updateStatusByTaskOperation(task);
         StepVerifier.create(deviceUpdateResponse)
-                .expectNext(true)
+                .assertNext(taskResponse -> {
+                    assertThat(taskResponse).isNotNull();
+                    assertThat(taskResponse.getId()).isEqualTo(task.getId());
+                    assertThat(taskResponse.getDeviceOperation()).isEqualTo(task.getDeviceOperation());
+                })
                 .verifyComplete();
 
         Mono<Device> deviceResponse = this.deviceRepository.findById(DEVICE_ID);
         StepVerifier.create(deviceResponse)
                 .assertNext(device -> {
-                    Assertions.assertThat(device).isNotNull();
-                    Assertions.assertThat(device.getId()).isEqualTo(DEVICE_ID);
-                    Assertions.assertThat(device.getName()).isEqualTo("Device 1");
-                    Assertions.assertThat(device.getDescription()).isEqualTo("Device 1 Description");
-                    Assertions.assertThat(device.getStatus()).isEqualTo(EnumDeviceStatus.OFF);
+                    assertThat(device).isNotNull();
+                    assertThat(device.getId()).isEqualTo(DEVICE_ID);
+                    assertThat(device.getName()).isEqualTo("Device 1");
+                    assertThat(device.getDescription()).isEqualTo("Device 1 Description");
+                    assertThat(device.getStatus()).isEqualTo(EnumDeviceStatus.OFF);
                 })
                 .verifyComplete();
     }
@@ -162,19 +167,23 @@ class DeviceRepositoryTest extends AbstractContainerBaseTest {
     @DisplayName("Turn Device ON")
     void givenDeviceItem_whenTaskTurnedOn_mustUpdateDeviceStatus() {
         task.setDeviceOperation(EnumDeviceOperation.ACTIVATE);
-        Mono<Boolean> deviceUpdateResponse = this.deviceRepository.updateStatusByTaskOperation(task);
+        Mono<Task> deviceUpdateResponse = this.deviceRepository.updateStatusByTaskOperation(task);
         StepVerifier.create(deviceUpdateResponse)
-                .expectNext(true)
+                .assertNext(taskResponse -> {
+                    assertThat(taskResponse).isNotNull();
+                    assertThat(taskResponse.getId()).isEqualTo(task.getId());
+                    assertThat(taskResponse.getDeviceOperation()).isEqualTo(task.getDeviceOperation());
+                })
                 .verifyComplete();
 
         Mono<Device> deviceResponse = this.deviceRepository.findById(DEVICE_ID);
         StepVerifier.create(deviceResponse)
                 .assertNext(device -> {
-                    Assertions.assertThat(device).isNotNull();
-                    Assertions.assertThat(device.getId()).isEqualTo(DEVICE_ID);
-                    Assertions.assertThat(device.getName()).isEqualTo("Device 1");
-                    Assertions.assertThat(device.getDescription()).isEqualTo("Device 1 Description");
-                    Assertions.assertThat(device.getStatus()).isEqualTo(EnumDeviceStatus.ON);
+                    assertThat(device).isNotNull();
+                    assertThat(device.getId()).isEqualTo(DEVICE_ID);
+                    assertThat(device.getName()).isEqualTo("Device 1");
+                    assertThat(device.getDescription()).isEqualTo("Device 1 Description");
+                    assertThat(device.getStatus()).isEqualTo(EnumDeviceStatus.ON);
                 })
                 .verifyComplete();
     }
@@ -184,7 +193,7 @@ class DeviceRepositoryTest extends AbstractContainerBaseTest {
     @DisplayName("Update not existing Device ID")
     void givenDeviceItem_whenUpdate_mustThrowException() {
         task.setDeviceId("100");
-        Mono<Boolean> deviceMonoResponse = this.deviceRepository.updateStatusByTaskOperation(task);
+        Mono<Task> deviceMonoResponse = this.deviceRepository.updateStatusByTaskOperation(task);
         StepVerifier.create(deviceMonoResponse)
                 .expectErrorMatches(throwable -> throwable instanceof ResourceNotFoundException)
                 .verify();

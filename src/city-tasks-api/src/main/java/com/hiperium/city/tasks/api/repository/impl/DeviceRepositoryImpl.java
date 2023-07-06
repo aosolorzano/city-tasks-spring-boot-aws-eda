@@ -24,20 +24,13 @@ public class DeviceRepositoryImpl implements DeviceRepository {
         this.dynamoDbAsyncClient = dynamoDbAsyncClient;
     }
 
-    public Mono<Boolean> updateStatusByTaskOperation(final Task task) {
+    public Mono<Task> updateStatusByTaskOperation(final Task task) {
         LOGGER.debug("updateStatusByTaskOperation(): {} - {}", task.getDeviceId(), task.getDeviceOperation());
         return this.findById(task.getDeviceId())
-                .map(device -> {
-                    if (EnumDeviceOperation.ACTIVATE.equals(task.getDeviceOperation())) {
-                        device.setStatus(EnumDeviceStatus.ON);
-                    } else {
-                        device.setStatus(EnumDeviceStatus.OFF);
-                    }
-                    return device;
-                })
+                .map(device -> setDeviceStatusByTaskOperation(task, device))
                 .flatMap(device -> Mono.fromFuture(
                         this.dynamoDbAsyncClient.putItem(DeviceUtil.putDeviceRequest(device))))
-                .map(putItemResponse -> putItemResponse.sdkHttpResponse().isSuccessful());
+                .thenReturn(task);
     }
 
     public Mono<Device> findById(final String id) {
@@ -47,5 +40,14 @@ public class DeviceRepositoryImpl implements DeviceRepository {
                     if(!itemResponse.hasItem()) throw new ResourceNotFoundException(EnumResourceError.DEVICE_NOT_FOUND, id);
                 })
                 .map(DeviceUtil::getFromItemResponse);
+    }
+
+    private static Device setDeviceStatusByTaskOperation(final Task task, final Device device) {
+        if (EnumDeviceOperation.ACTIVATE.equals(task.getDeviceOperation())) {
+            device.setStatus(EnumDeviceStatus.ON);
+        } else {
+            device.setStatus(EnumDeviceStatus.OFF);
+        }
+        return device;
     }
 }

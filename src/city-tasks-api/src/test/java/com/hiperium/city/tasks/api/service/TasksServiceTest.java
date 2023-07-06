@@ -24,6 +24,7 @@ class TasksServiceTest extends AbstractContainerBaseTest {
 
     private static final String DEVICE_1 = "123";
     private static final String DEVICE_2 = "456";
+    public static final long TASK_ID = 101L;
 
     @Autowired
     private TasksService tasksService;
@@ -41,7 +42,7 @@ class TasksServiceTest extends AbstractContainerBaseTest {
     @DisplayName("Find Task by ID")
     void givenTaskObject_whenFindById_thenReturnTask() {
         TaskCriteriaDto criteriaDto = TaskCriteriaDto.builder()
-                .id(1L)
+                .id(TASK_ID)
                 .build();
         Flux<TaskDto> taskFluxResult = this.tasksService.find(criteriaDto);
         StepVerifier.create(taskFluxResult)
@@ -53,7 +54,7 @@ class TasksServiceTest extends AbstractContainerBaseTest {
     @DisplayName("Find Task with not existing ID")
     void givenTaskObject_whenFindById_thenReturnException() {
         TaskCriteriaDto criteriaDto = TaskCriteriaDto.builder()
-                .id(100L)
+                .id(1000L)
                 .build();
         Flux<TaskDto> taskFluxResult = this.tasksService.find(criteriaDto);
         StepVerifier.create(taskFluxResult)
@@ -65,7 +66,7 @@ class TasksServiceTest extends AbstractContainerBaseTest {
     @DisplayName("Find Task by Name")
     void givenTaskObject_whenFindByName_thenReturnTask() {
         TaskCriteriaDto criteriaDto = TaskCriteriaDto.builder()
-                .name("1")
+                .name(String.valueOf(TASK_ID))
                 .build();
         Flux<TaskDto> taskFluxResult = this.tasksService.find(criteriaDto);
         StepVerifier.create(taskFluxResult)

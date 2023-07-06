@@ -7,6 +7,9 @@ import java.util.List;
 
 public class EventBridgeCustomEvent {
 
+    @JsonProperty("version")
+    private String version;
+
     @JsonProperty("id")
     private String id;
 
@@ -30,6 +33,14 @@ public class EventBridgeCustomEvent {
 
     @JsonProperty("detail")
     private TaskEventDetail detail;
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
 
     public String getId() {
         return id;
@@ -98,7 +109,8 @@ public class EventBridgeCustomEvent {
     @Override
     public String toString() {
         return "EventBridgeCustomEvent{" +
-                "id='" + id + '\'' +
+                "version='" + version + '\'' +
+                ", id='" + id + '\'' +
                 ", account='" + account + '\'' +
                 ", source='" + source + '\'' +
                 ", time=" + time +

@@ -6,7 +6,7 @@ import reactor.core.publisher.Mono;
 
 public interface DeviceRepository {
 
-    Mono<Boolean> updateStatusByTaskOperation(Task task);
+    Mono<Task> updateStatusByTaskOperation(Task task);
 
     Mono<Device> findById(String id);
 

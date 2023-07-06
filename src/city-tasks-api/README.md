@@ -5,7 +5,7 @@ Use this option if you want to explore more features such as running your tests 
 
 Deploy the required services using Docker Compose command:
 ```bash
-docker compose up localstack tasks-postgres tasks-proxy
+docker compose up tasks-localstack tasks-postgres tasks-proxy
 ```
 
 Open a new terminal window and export the following environment variables:

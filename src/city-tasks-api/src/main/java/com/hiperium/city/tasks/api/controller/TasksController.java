@@ -37,7 +37,7 @@ public class TasksController {
         return this.tasksService.find(criteriaDto);
     }
 
-    @GetMapping("/getTemplate")
+    @GetMapping("/template")
     @ResponseStatus(HttpStatus.OK)
     public TaskCriteriaDto getTemplateBody() {
         return TaskUtil.getTaskCriteriaTemplate();

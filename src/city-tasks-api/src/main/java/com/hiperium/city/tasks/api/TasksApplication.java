@@ -8,10 +8,12 @@ import com.hiperium.city.tasks.api.logger.HiperiumLogger;
 import com.hiperium.city.tasks.api.scheduler.execution.JobExecution;
 import com.hiperium.city.tasks.api.utils.PropertiesLoaderUtil;
 import com.hiperium.city.tasks.api.vo.AuroraSecretsVo;
+import com.hiperium.city.tasks.api.vo.AwsProperties;
 import lombok.SneakyThrows;
 import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportRuntimeHints;
@@ -22,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 
 @SpringBootApplication
 @EnableTransactionManagement
+@EnableConfigurationProperties(AwsProperties.class)
 @ImportRuntimeHints({QuartzHints.class, ResourceBundleHints.class})
 @RegisterReflectionForBinding({AuroraSecretsVo.class, JobExecution.class, ErrorDetailsDto.class})
 public class TasksApplication {

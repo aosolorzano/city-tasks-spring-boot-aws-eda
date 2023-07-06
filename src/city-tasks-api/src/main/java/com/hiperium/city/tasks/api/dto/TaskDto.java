@@ -24,7 +24,6 @@ public class TaskDto {
 
     private String description;
 
-    @NotNull(message = "validation.task.enabled.NotEmpty.message")
     private EnumTaskStatus status;
 
     @NotEmpty(message = "validation.device.id.NotEmpty.message")

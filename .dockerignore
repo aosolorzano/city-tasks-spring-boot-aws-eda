@@ -3,5 +3,6 @@
 !mvnw
 !pom.xml
 !src
+!envoy.yaml
 !utils/certs
-!utils/docker/envoy
+!utils/templates/maven

@@ -14,9 +14,9 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebFluxSecurity
-public class SecurityConfiguration {
+public class SpringSecurityConfig {
 
-    private static final HiperiumLogger LOGGER = HiperiumLogger.getLogger(SecurityConfiguration.class);
+    private static final HiperiumLogger LOGGER = HiperiumLogger.getLogger(SpringSecurityConfig.class);
 
     @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
     private String issuerUri;

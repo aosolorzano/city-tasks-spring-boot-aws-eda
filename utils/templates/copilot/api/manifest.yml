@@ -10,7 +10,7 @@ type: Load Balanced Web Service
 image:
   build:
     context: .
-    dockerfile: Dockerfile
+    dockerfile: src/city-tasks-api/Dockerfile
   port: 8080
 
 # ECS Task Definition.
@@ -54,7 +54,7 @@ sidecars:
     image:
       build:
         context: .
-        dockerfile: ./utils/docker/envoy/Dockerfile
+        dockerfile: ./src/city-tasks-proxy/Dockerfile
     variables:
       ENVOY_UID: 0
 

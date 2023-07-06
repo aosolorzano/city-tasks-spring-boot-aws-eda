@@ -6,7 +6,6 @@ import com.hiperium.city.tasks.api.logger.HiperiumLogger;
 import com.hiperium.city.tasks.api.model.Task;
 import com.hiperium.city.tasks.api.scheduler.TaskScheduler;
 import com.hiperium.city.tasks.api.utils.SchedulerUtil;
-import com.hiperium.city.tasks.api.utils.TaskUtil;
 import com.hiperium.city.tasks.api.utils.enums.EnumResourceError;
 import com.hiperium.city.tasks.api.utils.enums.EnumSchedulerError;
 import org.quartz.*;
@@ -32,7 +31,6 @@ public class TaskSchedulerImpl implements TaskScheduler {
 
     public void scheduleJob(final Task task) {
         LOGGER.debug("scheduleJob() - BEGIN: {}", task.getName());
-        task.setJobId(TaskUtil.generateJobId());
         JobDetail job = SchedulerUtil.createJobDetailFromTask(task);
         Trigger trigger = SchedulerUtil.createCronTriggerFromTask(task, this.timeZone);
         try {

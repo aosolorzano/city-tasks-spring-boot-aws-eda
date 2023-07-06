@@ -25,7 +25,7 @@ class ApplicationHandlerITest extends AbstractContainerBaseTest {
             "events/invalid-event-detail.json",
             "events/event-without-detail.json"})
     void givenEventList_whenInvokeLambdaFunction_thenReturn200(String jsonFilePath) {
-        await().atMost(5, TimeUnit.SECONDS).until(this.verifyLambdaActiveState());
+        await().atMost(3, TimeUnit.SECONDS).until(this.verifyLambdaActiveState());
         InvokeRequest invokeRequest = InvokeRequest.builder()
                 .functionName(FUNCTION_NAME)
                 .payload(getPayloadBytes(jsonFilePath))

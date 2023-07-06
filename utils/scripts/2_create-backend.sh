@@ -29,8 +29,8 @@ server_fqdn="$AWS_WORKLOADS_ENV.$server_domain_name"
 
 ### UPDATE API MANIFEST FILE WITH SERVER FQDN
 sed -i'.bak' -e "s/server_domain_name/$server_domain_name/g; s/server_fqdn/$server_fqdn/g;"  \
-      "$WORKING_DIR"/src/city-tasks-api/copilot/api/manifest.yml
-rm -f "$WORKING_DIR"/src/city-tasks-api/copilot/api/manifest.yml.bak
+      "$WORKING_DIR"/copilot/api/manifest.yml
+rm -f "$WORKING_DIR"/copilot/api/manifest.yml.bak
 
 ### ASKING TO STORE ALB ACCESS-LOGS
 sh "$WORKING_DIR"/utils/scripts/helper/0_a_create-s3-bucket-for-alb-logs.sh
@@ -74,19 +74,19 @@ fi
 ### UPDATING API MANIFEST FILE WITH COGNITO USER POOL ID
 idp_aws_region=$(aws configure get region --profile "$AWS_IDP_PROFILE")
 sed -i'.bak' -e "s/idp_aws_region/$idp_aws_region/g; s/cognito_user_pool_id/$cognito_user_pool_id/g"  \
-      "$WORKING_DIR"/src/city-tasks-api/copilot/api/manifest.yml
-rm -f "$WORKING_DIR"/src/city-tasks-api/copilot/api/manifest.yml.bak
+      "$WORKING_DIR"/copilot/api/manifest.yml
+rm -f "$WORKING_DIR"/copilot/api/manifest.yml.bak
 
 ### UPDATING ENV MANIFEST FILE WITH ACM ARN
 workloads_aws_region=$(aws configure get region --profile "$AWS_WORKLOADS_PROFILE")
 workloads_aws_account_id=$(aws configure get sso_account_id --profile "$AWS_WORKLOADS_PROFILE")
 acm_certificate_number=$(echo "$acm_arn" | cut -d'/' -f2)
 sed -i'.bak' -e "s/workloads_aws_region/$workloads_aws_region/g; s/workloads_aws_account_id/$workloads_aws_account_id/g; s/acm_certificate_number/$acm_certificate_number/g" \
-      "$WORKING_DIR"/src/city-tasks-api/copilot/environments/"$AWS_WORKLOADS_ENV"/manifest.yml
-rm -f "$WORKING_DIR"/src/city-tasks-api/copilot/environments/"$AWS_WORKLOADS_ENV"/manifest.yml.bak
+      "$WORKING_DIR"/copilot/environments/"$AWS_WORKLOADS_ENV"/manifest.yml
+rm -f "$WORKING_DIR"/copilot/environments/"$AWS_WORKLOADS_ENV"/manifest.yml.bak
 
 ### UPDATING ENVOY CONFIGURATION FILE FOR AWS
-cat "$WORKING_DIR"/utils/templates/docker/envoy/envoy-aws.yaml > "$WORKING_DIR"/src/city-tasks-api/utils/docker/envoy/envoy.yaml
+cat "$WORKING_DIR"/utils/templates/docker/envoy/envoy-aws.yaml > "$WORKING_DIR"/src/city-tasks-proxy/envoy.yaml
 echo ""
 echo "DONE!"
 

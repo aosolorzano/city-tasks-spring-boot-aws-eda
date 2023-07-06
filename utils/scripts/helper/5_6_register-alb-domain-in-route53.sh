@@ -78,8 +78,8 @@ fi
 
 ### UPDATING RECORD-SET FILE
 sed -i'.bak' -e "s/record-set-action/$record_set_action/g; s/server-name-fqdn/$server_fqdn/g; s/alb-domain-name/$alb_domain_name/g" \
-      "$WORKING_DIR"/src/city-tasks-api/utils/aws/route53/tasks-api-save-alb-record-set.json
-rm -f "$WORKING_DIR"/src/city-tasks-api/utils/aws/route53/tasks-api-save-alb-record-set.json.bak
+      "$WORKING_DIR"/utils/aws/route53/tasks-api-save-alb-record-set.json
+rm -f "$WORKING_DIR"/utils/aws/route53/tasks-api-save-alb-record-set.json.bak
 
 ### REGISTERING RECORD SET ON ROUTE53
 echo ""
@@ -87,9 +87,9 @@ echo "REGISTERING RECORD SET ON ROUTE53. PLEASE WAIT..."
 hosted_zone_id=$(echo "$hosted_zone_id" | cut -d'/' -f3)
 aws route53 change-resource-record-sets     \
   --hosted-zone-id "$hosted_zone_id"        \
-  --change-batch file://"$WORKING_DIR"/src/city-tasks-api/utils/aws/route53/tasks-api-save-alb-record-set.json \
+  --change-batch file://"$WORKING_DIR"/utils/aws/route53/tasks-api-save-alb-record-set.json \
   --profile "$AWS_ROUTE53_PROFILE"
 
 ### REVERTING RECORD-SET FILE
-cat "$WORKING_DIR"/utils/templates/route53/tasks-api-save-alb-record-set.json > "$WORKING_DIR"/src/city-tasks-api/utils/aws/route53/tasks-api-save-alb-record-set.json
+cat "$WORKING_DIR"/utils/templates/route53/tasks-api-save-alb-record-set.json > "$WORKING_DIR"/utils/aws/route53/tasks-api-save-alb-record-set.json
 echo "DONE!"

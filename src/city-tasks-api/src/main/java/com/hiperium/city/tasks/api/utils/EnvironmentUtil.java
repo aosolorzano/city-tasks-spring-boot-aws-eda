@@ -41,9 +41,9 @@ public final class EnvironmentUtil {
     }
 
     public static String getAwsRegion() {
-        String awsRegion = System.getenv("AWS_DEFAULT_REGION");
+        String awsRegion = System.getenv("AWS_REGION");
         if (Objects.isNull(awsRegion) || awsRegion.isBlank()) {
-            LOGGER.warn("AWS_DEFAULT_REGION not found. Using defaults.");
+            LOGGER.warn("AWS_REGION not found. Using defaults.");
         }
         return awsRegion;
     }

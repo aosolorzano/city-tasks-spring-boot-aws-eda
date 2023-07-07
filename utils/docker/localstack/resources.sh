@@ -18,13 +18,20 @@ awslocal dynamodb batch-write-item                            \
 echo ""
 echo "CREATING LAMBDA FUNCTION..."
 echo ""
-awslocal lambda create-function                 \
-  --function-name 'city-tasks-events'           \
-  --runtime 'java17'                            \
-  --architectures 'arm64'                       \
-  --role 'arn:aws:iam::000000000000:role/test'  \
+awslocal lambda create-function                         \
+  --function-name 'city-tasks-events'                   \
+  --runtime 'java17'                                    \
+  --architectures 'arm64'                               \
+  --role 'arn:aws:iam::000000000000:role/lambda-role'   \
   --handler 'com.hiperium.city.tasks.events.ApplicationHandler::handleRequest' \
   --zip-file fileb:///var/lib/localstack/city-tasks-events-1.6.0.jar
+
+echo ""
+echo "CREATING FUNCTION URL..."
+echo ""
+awslocal lambda create-function-url-config    \
+    --function-name city-tasks-events         \
+    --auth-type NONE
 
 echo ""
 echo "CREATING EVENTBRIDGE RULE..."

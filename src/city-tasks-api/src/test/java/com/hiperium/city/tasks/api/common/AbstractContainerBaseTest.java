@@ -17,9 +17,9 @@ public abstract class AbstractContainerBaseTest {
 
     protected static final String AUTHORIZATION = "Authorization";
 
-    protected static KeycloakContainer KEYCLOAK_CONTAINER;
-    protected static PostgreSQLContainer<?> POSTGRES_CONTAINER;
-    protected static LocalStackContainer LOCALSTACK_CONTAINER;
+    private static final KeycloakContainer KEYCLOAK_CONTAINER;
+    private static final PostgreSQLContainer<?> POSTGRES_CONTAINER;
+    private static final LocalStackContainer LOCALSTACK_CONTAINER;
 
     private static AccessTokenResponse accessTokenResponse;
 
@@ -61,12 +61,11 @@ public abstract class AbstractContainerBaseTest {
                 () -> ContainersUtil.POSTGRESQL_DRIVER);
         registry.add("spring.quartz.properties.org.quartz.dataSource.cityTasksQuartzDS.provider",
                 () -> ContainersUtil.QUARTZ_DS_PROVIDER);
-        // AWS DYNAMODB LOCALSTACK CONNECTION
+        // AWS LOCALSTACK CREDENTIALS, REGION AND ENDPOINT OVERRIDE
         registry.add("aws.region", LOCALSTACK_CONTAINER::getRegion);
         registry.add("aws.accessKeyId", LOCALSTACK_CONTAINER::getAccessKey);
         registry.add("aws.secretAccessKey", LOCALSTACK_CONTAINER::getSecretKey);
-        registry.add("aws.endpoint-override",
-                () -> LOCALSTACK_CONTAINER.getEndpointOverride(LocalStackContainer.Service.DYNAMODB).toString());
+        registry.add("aws.endpoint-override", () -> LOCALSTACK_CONTAINER.getEndpoint().toString());
     }
 
     @BeforeAll
@@ -77,5 +76,9 @@ public abstract class AbstractContainerBaseTest {
 
     protected String getBearerAccessToken() {
         return "Bearer " + Objects.requireNonNull(accessTokenResponse).getToken();
+    }
+
+    protected static LocalStackContainer getLocalstackContainer() {
+        return LOCALSTACK_CONTAINER;
     }
 }

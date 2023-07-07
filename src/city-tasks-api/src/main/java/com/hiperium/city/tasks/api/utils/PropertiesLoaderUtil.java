@@ -21,8 +21,9 @@ public final class PropertiesLoaderUtil {
         setDatasourceConnection();
         setIdentityProviderEndpoint();
         setApplicationTimeZone();
-        setAwsCredentials();
-        setAwsEndpointOverride();
+        //setAwsCredentials();
+        //setAwsRegion();
+        //setAwsEndpointOverride();
         LOGGER.info("loadProperties() - END");
     }
 
@@ -70,6 +71,9 @@ public final class PropertiesLoaderUtil {
             LOGGER.debug("AWS Secret Key: {}", awsSecretKey);
             System.setProperty("aws.secretKey", awsSecretKey);
         }
+    }
+
+    public static void setAwsRegion() {
         String awsRegion = EnvironmentUtil.getAwsRegion();
         if (Objects.nonNull(awsRegion) && !awsRegion.isEmpty()) {
             LOGGER.debug("AWS Region: {}", awsRegion);

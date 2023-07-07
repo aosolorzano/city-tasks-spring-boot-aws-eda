@@ -1,31 +1,36 @@
 package com.hiperium.city.tasks.api.config;
 
-import com.hiperium.city.tasks.api.common.AwsClientConfigBase;
 import com.hiperium.city.tasks.api.logger.HiperiumLogger;
-import com.hiperium.city.tasks.api.vo.AwsProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.regions.providers.DefaultAwsRegionProviderChain;
 import software.amazon.awssdk.services.eventbridge.EventBridgeClient;
 import software.amazon.awssdk.services.eventbridge.EventBridgeClientBuilder;
 
+import java.net.URI;
+import java.util.Objects;
+
 @Configuration
-public class EventBridgeClientConfig extends AwsClientConfigBase {
+public class EventBridgeClientConfig {
 
     private static final HiperiumLogger LOGGER = HiperiumLogger.getLogger(EventBridgeClientConfig.class);
 
-    public EventBridgeClientConfig(AwsProperties awsProperties) {
-        super.awsProperties = awsProperties;
-    }
+    @Value("${aws.endpoint-override}")
+    private String endpointOverride;
 
     @Bean
     public EventBridgeClient eventBridgeClient() {
-        LOGGER.debug("EventBridge Endpoint Override: {}", this.awsProperties.getEndpointOverride());
-        LOGGER.debug("EventBridge Region: {}", this.awsProperties.getRegion());
+        if (Objects.isNull(this.endpointOverride) || this.endpointOverride.isEmpty()) {
+            return EventBridgeClient.create();
+        }
+        LOGGER.debug("EventBridge Endpoint: {}", this.endpointOverride);
+        var regionProvider = DefaultAwsRegionProviderChain.builder().build();
         EventBridgeClientBuilder eventBridgeClientBuilder = EventBridgeClient.builder()
-                .region(Region.of(awsProperties.getRegion()));
-        super.configureCredentials(eventBridgeClientBuilder);
-        super.configureEndpoint(eventBridgeClientBuilder);
+                .credentialsProvider(DefaultCredentialsProvider.create())
+                .region(regionProvider.getRegion());
+        eventBridgeClientBuilder.endpointOverride(URI.create(this.endpointOverride));
         return eventBridgeClientBuilder.build();
     }
 }

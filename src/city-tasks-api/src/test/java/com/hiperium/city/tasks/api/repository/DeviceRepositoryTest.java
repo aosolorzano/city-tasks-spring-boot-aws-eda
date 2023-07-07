@@ -1,6 +1,7 @@
 package com.hiperium.city.tasks.api.repository;
 
 import com.hiperium.city.tasks.api.common.AbstractContainerBaseTest;
+import com.hiperium.city.tasks.api.config.DynamoDBClientConfig;
 import com.hiperium.city.tasks.api.exception.ResourceNotFoundException;
 import com.hiperium.city.tasks.api.model.Device;
 import com.hiperium.city.tasks.api.model.Task;
@@ -13,22 +14,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
-import org.testcontainers.containers.localstack.LocalStackContainer;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.core.waiters.WaiterResponse;
-import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
-import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
+import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbAsyncWaiter;
 
-import java.net.URI;
+import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Fail.fail;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
 @ActiveProfiles("test")
@@ -50,47 +44,10 @@ class DeviceRepositoryTest extends AbstractContainerBaseTest {
 
     @BeforeAll
     public static void init() {
-        try (DynamoDbClient ddb = DynamoDbClient.builder()
-                .endpointOverride(URI.create(LOCALSTACK_CONTAINER.getEndpointOverride(LocalStackContainer.Service.DYNAMODB).toString()))
-                .credentialsProvider(
-                        StaticCredentialsProvider.create(
-                                AwsBasicCredentials.create(LOCALSTACK_CONTAINER.getAccessKey(), LOCALSTACK_CONTAINER.getSecretKey())
-                        )
-                )
-                .region(Region.of(LOCALSTACK_CONTAINER.getRegion()))
-                .build()) {
-
-            DynamoDbWaiter dbWaiter = ddb.waiter();
-            CreateTableRequest request = CreateTableRequest.builder()
-                    .attributeDefinitions(AttributeDefinition.builder()
-                            .attributeName("id")
-                            .attributeType(ScalarAttributeType.S)
-                            .build())
-                    .keySchema(KeySchemaElement.builder()
-                            .attributeName("id")
-                            .keyType(KeyType.HASH)
-                            .build())
-                    .provisionedThroughput(ProvisionedThroughput.builder()
-                            .readCapacityUnits(1L)
-                            .writeCapacityUnits(1L)
-                            .build())
-                    .tableName(Device.TABLE_NAME)
-                    .build();
-            try {
-                CreateTableResponse response = ddb.createTable(request);
-                DescribeTableRequest tableRequest = DescribeTableRequest.builder()
-                        .tableName(Device.TABLE_NAME)
-                        .build();
-                WaiterResponse<DescribeTableResponse> waiterResponse = dbWaiter.waitUntilTableExists(tableRequest);
-                waiterResponse.matched().response().ifPresent(System.out::println);
-                String newTable = response.tableDescription().tableName();
-                assertThat(newTable).isEqualTo(Device.TABLE_NAME);
-            } catch (DynamoDbException e) {
-                fail(e.getMessage());
-                throw e;
-            }
-        }
-        // INITIALIZE TESTING TASK
+        DynamoDbAsyncClient dbAsyncClient = DynamoDBClientConfig
+                .getDynamoDbAsyncClientBuilder(getLocalstackContainer().getEndpoint().toString())
+                .build();
+        createTable(dbAsyncClient);
         task = TaskUtil.getTaskTemplate();
         task.setDeviceId(DEVICE_ID);
     }
@@ -206,5 +163,45 @@ class DeviceRepositoryTest extends AbstractContainerBaseTest {
                 .description("Device 1 Description")
                 .status(EnumDeviceStatus.ON)
                 .build();
+    }
+
+    private static void createTable(DynamoDbAsyncClient dbAsyncClient) {
+        CreateTableRequest request = CreateTableRequest.builder()
+                .tableName(Device.TABLE_NAME)
+                .attributeDefinitions(AttributeDefinition.builder()
+                        .attributeName("id")
+                        .attributeType(ScalarAttributeType.S)
+                        .build())
+                .keySchema(KeySchemaElement.builder()
+                        .attributeName("id")
+                        .keyType(KeyType.HASH)
+                        .build())
+                .provisionedThroughput(ProvisionedThroughput.builder()
+                        .readCapacityUnits(5L)
+                        .writeCapacityUnits(5L)
+                        .build())
+                .build();
+
+        CompletableFuture<CreateTableResponse> createTableFuture = dbAsyncClient.createTable(request);
+        createTableFuture.thenCompose(response -> {
+            DescribeTableRequest describeRequest = DescribeTableRequest.builder()
+                    .tableName(Device.TABLE_NAME)
+                    .build();
+            return dbAsyncClient.describeTable(describeRequest);
+
+        }).thenCompose(describeResponse -> {
+            String tableStatus = describeResponse.table().tableStatusAsString();
+            if ("ACTIVE".equals(tableStatus)) {
+                CompletableFuture<DescribeTableResponse> completedFuture = new CompletableFuture<>();
+                completedFuture.complete(describeResponse);
+                return completedFuture;
+            }
+            DynamoDbAsyncWaiter waiter = dbAsyncClient.waiter();
+            DescribeTableRequest waiterRequest = DescribeTableRequest.builder()
+                    .tableName(Device.TABLE_NAME)
+                    .build();
+            return waiter.waitUntilTableExists(waiterRequest)
+                    .thenApply(waiterResponse -> describeResponse);
+        }).join();
     }
 }

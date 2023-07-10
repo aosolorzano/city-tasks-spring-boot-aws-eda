@@ -3,15 +3,15 @@
 #####################################################################################
 FROM amazoncorretto:17.0.7-al2023 AS builder
 WORKDIR /workspace/app
-COPY mvnw                                       mvnw
-COPY .mvn                                       .mvn
-COPY utils/templates/maven/tasks-api-pom.xml    pom.xml
-COPY src/city-tasks-api/pom.xml                 src/city-tasks-api/pom.xml
-RUN ./mvnw dependency:go-offline -B
+COPY mvnw                              mvnw
+COPY .mvn                              .mvn
+COPY pom.xml                           pom.xml
+COPY src/city-tasks-api/pom.xml        src/city-tasks-api/pom.xml
+RUN ./mvnw dependency:go-offline -B -f src/city-tasks-api/pom.xml
+COPY src/city-tasks-api/src            src/city-tasks-api/src
 
-COPY src/city-tasks-api/src                     src/city-tasks-api/src
-RUN ./mvnw clean package -DskipTests
-RUN mkdir -p src/city-tasks-api/target/dependency && \
+RUN ./mvnw clean package -DskipTests -f src/city-tasks-api/pom.xml  && \
+    mkdir -p src/city-tasks-api/target/dependency                   && \
     (cd src/city-tasks-api/target/dependency; jar -xf ../*.jar)
 
 #####################################################################################

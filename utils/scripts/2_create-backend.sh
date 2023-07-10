@@ -91,7 +91,18 @@ echo ""
 echo "DONE!"
 
 echo ""
-echo "INITIALIZING COPILOT STACK ON AWS..."
+echo "BUILDING SAM PROJECT..."
+sam build --config-env "$AWS_WORKLOADS_ENV"
+
+echo ""
+echo "DEPLOYING SAM PROJECT INTO AWS..."
+sam deploy                            \
+  --config-env "$AWS_WORKLOADS_ENV"   \
+  --disable-rollback                  \
+  --profile "$AWS_WORKLOADS_PROFILE"
+
+echo ""
+echo "INITIALIZING COPILOT STACK INTO AWS..."
 copilot init                              \
   --app city-tasks                        \
   --name api                              \
@@ -103,7 +114,7 @@ echo ""
 echo "DONE!"
 
 echo ""
-echo "INITIALIZING ENVIRONMENT ON AWS..."
+echo "INITIALIZING ENVIRONMENT INTO AWS..."
 copilot env init                          \
   --app city-tasks                        \
   --name "$AWS_WORKLOADS_ENV"             \
@@ -113,7 +124,7 @@ echo ""
 echo "DONE!"
 
 echo ""
-echo "DEPLOYING ENVIRONMENT NETWORKING ON AWS..."
+echo "DEPLOYING ENVIRONMENT NETWORKING INTO AWS..."
 copilot env deploy                        \
   --app city-tasks                        \
   --name "$AWS_WORKLOADS_ENV"
@@ -121,7 +132,7 @@ echo ""
 echo "DONE!"
 
 echo ""
-echo "DEPLOYING CONTAINER APPLICATION ON AWS..."
+echo "DEPLOYING CONTAINER APPLICATION INTO AWS..."
 copilot deploy                            \
   --app city-tasks                        \
   --name api                              \

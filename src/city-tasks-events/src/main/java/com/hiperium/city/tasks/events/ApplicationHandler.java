@@ -22,7 +22,7 @@ public class ApplicationHandler implements RequestStreamHandler {
     @Logging
     public void handleRequest(final InputStream inputStream, final OutputStream outputStream, final Context context) {
         EventBridgeCustomEvent event = FunctionUtil.unmarshal(inputStream, EventBridgeCustomEvent.class);
-        LOGGER.info("handleRequest(): {}", event);
+        LOGGER.debug("handleRequest(): {}", event);
         FunctionUtil.validateEvent(event);
     }
 }

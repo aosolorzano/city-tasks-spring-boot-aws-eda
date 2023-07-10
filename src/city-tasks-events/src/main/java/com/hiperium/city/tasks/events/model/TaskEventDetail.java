@@ -5,13 +5,13 @@ import com.hiperium.city.tasks.events.utils.enums.EnumDeviceOperation;
 
 public class TaskEventDetail {
 
-    @JsonProperty("task-id")
+    @JsonProperty("taskId")
     private Long taskId;
 
-    @JsonProperty("device-id")
+    @JsonProperty("deviceId")
     private String deviceId;
 
-    @JsonProperty("device-operation")
+    @JsonProperty("deviceOperation")
     private EnumDeviceOperation deviceOperation;
 
     public Long getTaskId() {

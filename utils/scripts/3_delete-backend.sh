@@ -28,7 +28,12 @@ fi
 echo ""
 echo "GETTING INFORMATION FROM AWS. PLEASE WAIT..."
 
-### GETTING ALB DOMAIN NAME
+### VERIFY AWS PROFILE NAME
+if [ -z "$AWS_WORKLOADS_PROFILE" ]; then
+  echo ""
+  echo "You must specify the AWS profile before delete the resources."
+  exit 1
+fi
 alb_domain_name=$(aws cloudformation describe-stacks --stack-name city-tasks-"$AWS_WORKLOADS_ENV" \
   --query "Stacks[0].Outputs[?OutputKey=='PublicLoadBalancerDNSName'].OutputValue" \
   --output text \
@@ -81,6 +86,13 @@ else
     --profile "$AWS_ROUTE53_PROFILE"
   echo "DONE!"
 fi
+
+### DELETE SAM-PROJECT
+sam delete                              \
+  --stack-name city-tasks-events        \
+  --config-env "$AWS_WORKLOADS_ENV"     \
+  --no-prompts                          \
+  --profile "$AWS_WORKLOADS_PROFILE"
 
 ### REVERT CONFIGURATION FILES
 sh "$WORKING_DIR"/utils/scripts/helper/1_revert-automated-scripts.sh

@@ -58,12 +58,12 @@ public class JobExecution implements Job {
                 .deviceOperation(task.getDeviceOperation())
                 .build();
         PutEventsRequestEntry entry = createRequestEntry(objectMapper, taskEventDto);
-        PutEventsRequest eventsRequest = PutEventsRequest.builder()
+        PutEventsRequest eventRequest = PutEventsRequest.builder()
                 .entries(entry)
                 .build();
 
-        this.eventBridgeClient.putEvents(eventsRequest);
-        PutEventsResponse result = this.eventBridgeClient.putEvents(eventsRequest);
+        this.eventBridgeClient.putEvents(eventRequest);
+        PutEventsResponse result = this.eventBridgeClient.putEvents(eventRequest);
         for (PutEventsResultEntry resultEntry : result.entries()) {
             if (Objects.nonNull(resultEntry.eventId())) {
                 LOGGER.info("Event ID: {} sent successfully to EventBridge.", resultEntry.eventId());

@@ -13,12 +13,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TaskEventDto {
 
-    @JsonProperty("task-id")
+    @JsonProperty("taskId")
     private Long taskId;
 
-    @JsonProperty("device-id")
+    @JsonProperty("deviceId")
     private String deviceId;
 
-    @JsonProperty("device-operation")
+    @JsonProperty("deviceOperation")
     private EnumDeviceOperation deviceOperation;
 }

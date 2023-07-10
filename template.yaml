@@ -13,7 +13,7 @@ Resources:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       FunctionName: city-tasks-events
-      CodeUri: ./src/city-tasks-events/target/city-tasks-events-1.6.0.jar
+      CodeUri: ./src/city-tasks-events
       Handler: com.hiperium.city.tasks.events.ApplicationHandler::handleRequest
       Runtime: java17
       Architectures:
@@ -31,10 +31,16 @@ Resources:
               detail-type:
                 - TaskExecution
 
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${CityTasksEventsFunction}"
+      RetentionInDays: 7
+
 Outputs:
   CityTasksEventsFunction:
     Description: "CityTasksEvents Lambda Function ARN."
     Value: !GetAtt CityTasksEventsFunction.Arn
-  CityTasksEventsFunctionRole:
+  CityTasksEventsFunctionIamRole:
     Description: "Implicit IAM Role created for the CityTasksEvents function."
     Value: !GetAtt CityTasksEventsFunctionRole.Arn

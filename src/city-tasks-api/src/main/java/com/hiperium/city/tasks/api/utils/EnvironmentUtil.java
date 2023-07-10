@@ -39,36 +39,4 @@ public final class EnvironmentUtil {
         }
         return timeZoneId;
     }
-
-    public static String getAwsRegion() {
-        String awsRegion = System.getenv("AWS_REGION");
-        if (Objects.isNull(awsRegion) || awsRegion.isBlank()) {
-            LOGGER.warn("AWS_REGION not found. Using defaults.");
-        }
-        return awsRegion;
-    }
-
-    public static String getAwsAccessKey() {
-        String awsAccessKey = System.getenv("AWS_ACCESS_KEY_ID");
-        if (Objects.isNull(awsAccessKey) || awsAccessKey.isBlank()) {
-            LOGGER.warn("AWS_ACCESS_KEY_ID not found. Using defaults.");
-        }
-        return awsAccessKey;
-    }
-
-    public static String getAwsSecretKey() {
-        String awsSecretKey = System.getenv("AWS_SECRET_ACCESS_KEY");
-        if (Objects.isNull(awsSecretKey) || awsSecretKey.isBlank()) {
-            LOGGER.warn("AWS_SECRET_ACCESS_KEY not found. Using defaults.");
-        }
-        return awsSecretKey;
-    }
-
-    public static String getAwsEndpointOverride() {
-        String endpointOverride = System.getenv("AWS_ENDPOINT_OVERRIDE");
-        if (Objects.isNull(endpointOverride) || endpointOverride.isBlank()) {
-            LOGGER.warn("AWS_ENDPOINT_OVERRIDE not found. Using defaults.");
-        }
-        return endpointOverride;
-    }
 }

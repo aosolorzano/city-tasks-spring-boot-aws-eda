@@ -8,8 +8,8 @@
   "resources": [],
   "detail-type": "TaskExecution",
   "detail": {
-    "task-id": 10,
-    "device-id": "123",
-    "device-operation": "ACTIVATE"
+    "taskId": 10,
+    "deviceId": "123",
+    "deviceOperation": "ACTIVATE"
   }
 }

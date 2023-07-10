@@ -21,9 +21,6 @@ public final class PropertiesLoaderUtil {
         setDatasourceConnection();
         setIdentityProviderEndpoint();
         setApplicationTimeZone();
-        //setAwsCredentials();
-        //setAwsRegion();
-        //setAwsEndpointOverride();
         LOGGER.info("loadProperties() - END");
     }
 
@@ -57,35 +54,6 @@ public final class PropertiesLoaderUtil {
         if (Objects.nonNull(timeZoneId) && !timeZoneId.isEmpty()) {
             LOGGER.debug("Time Zone: {}", timeZoneId);
             System.setProperty("city.tasks.time.zone", timeZoneId);
-        }
-    }
-
-    public static void setAwsCredentials() {
-        String awsAccessKey = EnvironmentUtil.getAwsAccessKey();
-        if (Objects.nonNull(awsAccessKey) && !awsAccessKey.isEmpty()) {
-            LOGGER.debug("AWS Access Key: {}", awsAccessKey);
-            System.setProperty("aws.accessKeyId", awsAccessKey);
-        }
-        String awsSecretKey = EnvironmentUtil.getAwsSecretKey();
-        if (Objects.nonNull(awsSecretKey) && !awsSecretKey.isEmpty()) {
-            LOGGER.debug("AWS Secret Key: {}", awsSecretKey);
-            System.setProperty("aws.secretKey", awsSecretKey);
-        }
-    }
-
-    public static void setAwsRegion() {
-        String awsRegion = EnvironmentUtil.getAwsRegion();
-        if (Objects.nonNull(awsRegion) && !awsRegion.isEmpty()) {
-            LOGGER.debug("AWS Region: {}", awsRegion);
-            System.setProperty("aws.region", awsRegion);
-        }
-    }
-
-    public static void setAwsEndpointOverride() {
-        String endpointOverride = EnvironmentUtil.getAwsEndpointOverride();
-        if (Objects.nonNull(endpointOverride) && !endpointOverride.isEmpty()) {
-            LOGGER.debug("AWS Endpoint-Override: {}", endpointOverride);
-            System.setProperty("aws.dynamodb.endpoint-override", endpointOverride);
         }
     }
 }

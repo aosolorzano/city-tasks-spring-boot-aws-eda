@@ -1,6 +1,7 @@
 package com.hiperium.city.tasks.api.common;
 
 import com.hiperium.city.tasks.api.utils.ContainersUtil;
+import com.hiperium.city.tasks.api.utils.PropertiesLoaderUtil;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import org.junit.jupiter.api.BeforeAll;
 import org.keycloak.admin.client.Keycloak;
@@ -61,11 +62,12 @@ public abstract class AbstractContainerBaseTest {
                 () -> ContainersUtil.POSTGRESQL_DRIVER);
         registry.add("spring.quartz.properties.org.quartz.dataSource.cityTasksQuartzDS.provider",
                 () -> ContainersUtil.QUARTZ_DS_PROVIDER);
-        // AWS LOCALSTACK CREDENTIALS, REGION AND ENDPOINT OVERRIDE
+        // AWS REGION, CREDENTIALS, AND ENDPOINT-OVERRIDE
+        // SDK Region provider looks for the 'aws.region' System Property first.
         registry.add("aws.region", LOCALSTACK_CONTAINER::getRegion);
         registry.add("aws.accessKeyId", LOCALSTACK_CONTAINER::getAccessKey);
         registry.add("aws.secretAccessKey", LOCALSTACK_CONTAINER::getSecretKey);
-        registry.add("aws.endpoint-override", () -> LOCALSTACK_CONTAINER.getEndpoint().toString());
+        registry.add(PropertiesLoaderUtil.AWS_ENDPOINT_OVERRIDE, () -> LOCALSTACK_CONTAINER.getEndpoint().toString());
     }
 
     @BeforeAll

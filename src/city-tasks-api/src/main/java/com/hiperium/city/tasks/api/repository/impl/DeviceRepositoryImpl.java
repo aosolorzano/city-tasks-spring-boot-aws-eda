@@ -1,5 +1,6 @@
 package com.hiperium.city.tasks.api.repository.impl;
 
+import com.hiperium.city.tasks.api.exception.ApplicationException;
 import com.hiperium.city.tasks.api.exception.ResourceNotFoundException;
 import com.hiperium.city.tasks.api.logger.HiperiumLogger;
 import com.hiperium.city.tasks.api.model.Device;
@@ -12,6 +13,9 @@ import com.hiperium.city.tasks.api.utils.enums.EnumResourceError;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
+import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
+import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
 
 @Repository
 public class DeviceRepositoryImpl implements DeviceRepository {
@@ -25,29 +29,42 @@ public class DeviceRepositoryImpl implements DeviceRepository {
     }
 
     public Mono<Task> updateStatusByTaskOperation(final Task task) {
-        LOGGER.debug("updateStatusByTaskOperation(): {} - {}", task.getDeviceId(), task.getDeviceOperation());
+        LOGGER.debug("updateStatusByTaskOperation() - START");
         return this.findById(task.getDeviceId())
-                .map(device -> setDeviceStatusByTaskOperation(task, device))
-                .flatMap(device -> Mono.fromFuture(
-                        this.dynamoDbAsyncClient.putItem(DeviceUtil.putDeviceRequest(device))))
+                .doOnNext(device -> setStatusByTaskOperation(task, device))
+                .map(DeviceUtil::createPutRequest)
+                .doOnNext(this::updateDeviceItem)
                 .thenReturn(task);
     }
 
     public Mono<Device> findById(final String id) {
-        LOGGER.debug("findById(): {}", id);
-        return Mono.fromFuture(this.dynamoDbAsyncClient.getItem(DeviceUtil.getDeviceRequest(id)))
-                .doOnNext(itemResponse -> {
-                    if(!itemResponse.hasItem()) throw new ResourceNotFoundException(EnumResourceError.DEVICE_NOT_FOUND, id);
-                })
+        GetItemRequest getItemRequest = DeviceUtil.createGetRequest(id);
+        return Mono.fromFuture(this.dynamoDbAsyncClient.getItem(getItemRequest))
+                .doOnNext(itemResponse -> LOGGER.debug("findById(): {}", itemResponse))
+                .doOnNext(itemResponse -> verifyResponse(id, itemResponse))
                 .map(DeviceUtil::getFromItemResponse);
     }
 
-    private static Device setDeviceStatusByTaskOperation(final Task task, final Device device) {
+    private void updateDeviceItem(PutItemRequest putItemRequest) {
+        LOGGER.debug("updateDeviceItem() - START: {}", putItemRequest);
+        Mono.fromFuture(this.dynamoDbAsyncClient.putItem(putItemRequest))
+                .doOnError(DeviceRepositoryImpl::createCustomError)
+                .subscribe();
+    }
+
+    private static void createCustomError(Throwable error) {
+        throw new ApplicationException(error.getMessage(), error);
+    }
+
+    private static void setStatusByTaskOperation(final Task task, final Device device) {
         if (EnumDeviceOperation.ACTIVATE.equals(task.getDeviceOperation())) {
             device.setStatus(EnumDeviceStatus.ON);
         } else {
             device.setStatus(EnumDeviceStatus.OFF);
         }
-        return device;
+    }
+
+    private static void verifyResponse(String id, GetItemResponse itemResponse) {
+        if(!itemResponse.hasItem()) throw new ResourceNotFoundException(EnumResourceError.DEVICE_NOT_FOUND, id);
     }
 }

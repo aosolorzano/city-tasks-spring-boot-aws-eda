@@ -5,7 +5,7 @@ Use this option if you want to explore more features such as running your tests 
 
 Deploy the required services using Docker Compose command:
 ```bash
-docker compose up tasks-localstack tasks-postgres tasks-proxy
+docker compose up tasks-localstack tasks-postgres
 ```
 
 Open a new terminal window and export the following environment variables:
@@ -20,9 +20,14 @@ export AWS_SECRET_ACCESS_KEY='DUMMY'
 export AWS_ENDPOINT_OVERRIDE='http://localhost:4566'
 ```
 
-Then, create and run the native executable from the project's root directory:
+Then, run the Spring Boot microservice from the project's root directory:
 ```bash
-$ ./mvnw clean native:compile -Pnative spring-boot:run
+$ mvn clean spring-boot:run -f src/city-tasks-api/pom.xml
+```
+
+Or, create and run the native executable:
+```bash
+$ mvn clean native:compile -Pnative spring-boot:run -f src/city-tasks-api/pom.xml
 ```
 
 ### AWS Copilot CLI - Helpful Commands.

@@ -5,14 +5,13 @@ Description: SAM Template for the City Tasks Events project.
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    Timeout: 5
+    Timeout: 15
     MemorySize: 512
 
 Resources:
   CityTasksEventsFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: city-tasks-events
       CodeUri: ./src/city-tasks-events
       Handler: com.hiperium.city.tasks.events.ApplicationHandler::handleRequest
       Runtime: java17

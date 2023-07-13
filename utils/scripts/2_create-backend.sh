@@ -1,7 +1,7 @@
 #!/bin/bash
 
-cd "$WORKING_DIR"/src/city-tasks-api || {
-  echo "Error moving to the Tasks Service directory."
+cd "$WORKING_DIR" || {
+  echo "Error moving to the project's root directory."
   exit 1
 }
 
@@ -107,9 +107,9 @@ copilot init                              \
   --app city-tasks                        \
   --name api                              \
   --type 'Load Balanced Web Service'      \
-  --dockerfile './Dockerfile'             \
   --port 8080                             \
-  --tag '1.6.0'
+  --tag '1.6.0'                           \
+  --dockerfile './src/city-tasks-api/Dockerfile'
 echo ""
 echo "DONE!"
 
@@ -144,26 +144,64 @@ echo ""
 echo "DONE!"
 
 echo ""
+echo "ASSIGNING EVENTBRIDGE IAM-POLICY TO ECS-TASK..."
+sed -i'.bak' -e "s/aws_region/$workloads_aws_region/g; s/aws_account_id/$workloads_aws_account_id/g" \
+      "$WORKING_DIR"/utils/aws/iam/ecs-task-eventbridge-put-policy.json
+rm -f "$WORKING_DIR"/utils/aws/iam/ecs-task-eventbridge-put-policy.json.bak
+
+ecs_task_role_name=$(aws iam list-roles --output text \
+  --query "Roles[?contains(RoleName, 'city-tasks-$AWS_WORKLOADS_ENV-api-TaskRole')].[RoleName]" \
+  --profile "$AWS_WORKLOADS_PROFILE")
+if [ -z "$ecs_task_role_name" ]; then
+  echo ""
+  echo "WARNING: ECS Task Role was not found with name: 'city-tasks-$AWS_WORKLOADS_ENV-api'."
+  echo "         Please, assign the following IAM-Policy to the ECS Task Role manually:"
+  echo ""
+  cat "$WORKING_DIR"/utils/aws/iam/ecs-task-eventbridge-put-policy.json
+  echo ""
+else
+  aws iam put-role-policy --role-name "$ecs_task_role_name"                     \
+    --policy-name city-tasks-"$AWS_WORKLOADS_ENV"-api-EventBridge-PutPolicy     \
+    --policy-document file://"$WORKING_DIR"/utils/aws/iam/ecs-task-eventbridge-put-policy.json \
+    --profile "$AWS_WORKLOADS_PROFILE"
+fi
+echo "DONE!"
+
+### LOADING DEVICE TEST DATA INTO DYNAMODB
+if [ "$AWS_WORKLOADS_ENV" == "dev" ]; then
+  echo ""
+  echo "WRITING DEVICE TESTING DATA INTO DYNAMODB..."
+  aws dynamodb batch-write-item \
+        --request-items file://"$WORKING_DIR"/utils/aws/dynamodb/devices-test-data.json \
+        --profile "$AWS_WORKLOADS_PROFILE"
+  echo "DONE!"
+fi
+
+echo ""
 echo "GETTING ALB DOMAIN NAME..."
+echo ""
 alb_domain_name=$(aws cloudformation describe-stacks --stack-name city-tasks-"$AWS_WORKLOADS_ENV" \
   --query "Stacks[0].Outputs[?OutputKey=='PublicLoadBalancerDNSName'].OutputValue" \
   --output text \
   --profile "$AWS_WORKLOADS_PROFILE")
-echo "$alb_domain_name"
+echo "Domain Name: $alb_domain_name"
 
 ### ASKING TO REGISTER ALB DOMAIN NAME ON ROUTE53
 echo ""
 read -r -p "Do you want to <register> the ALB domain name on Route53? [Y/n] " register_alb_domain_name
-if [ "$register_alb_domain_name" ]; then
+if [ -z "$register_alb_domain_name" ]; then
   read -r -p "Do you want to <Update> an existing Record Set? [Y/n] " update_record_set
-  if [ "$update_record_set" ]; then
+  if [ -z "$update_record_set" ]; then
     export UPDATE_RECORD_SET="true"
   else
     export UPDATE_RECORD_SET="false"
   fi
   export SERVER_DOMAIN_NAME="$server_domain_name"
   export ALB_DOMAIN_NAME="$alb_domain_name"
-  sh "$WORKING_DIR"/utils/scripts/helper/5_6_register-alb-domain-in-route53.sh
+  sh "$WORKING_DIR"/utils/scripts/helper/6_7_register-alb-domain-in-route53.sh
+else
+  echo ""
+  echo "No problem at all. You can register the ALB domain name on Route53 later."
+  echo ""
+  echo "DONE!"
 fi
-echo ""
-echo "DONE!"

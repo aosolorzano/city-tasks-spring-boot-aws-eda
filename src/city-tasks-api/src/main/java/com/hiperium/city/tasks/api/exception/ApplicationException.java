@@ -6,8 +6,8 @@ public class ApplicationException extends RuntimeException {
     private final String errorMessageKey;
     private final transient Object[] args;
 
-    public ApplicationException(String message) {
-        super(message);
+    public ApplicationException(String message, Throwable cause) {
+        super(message, cause);
         this.errorCode = null;
         this.errorMessageKey = null;
         this.args = null;

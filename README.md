@@ -5,7 +5,7 @@
 * **Level**: Advanced.
 * **Technologies**: Java 17, Spring Boot 3, Spring Native, Spring WebFlux, Spring OAuth2, Quartz, Flyway, AWS Copilot CLI, Testcontainers, LocalStack, Aurora Postgres, DynamoDB, Elastic Load Balancer (ELB), SNS, EventBridge, Lambda, and Docker.
 
-![](utils/docs/images/solution_architecture_v3.png)
+![](utils/docs/images/solution_architecture_v4.png)
 
 You can read the following sequence of articles to get more context:
 
@@ -26,7 +26,7 @@ This project also uses Docker Compose to deploy a local cluster with the require
 - Git.
 - AWS CLI (version 2.11.+).
 - AWS Copilot CLI (version 1.27.+).
-- AWS SAM CLI (version 1.88.+).
+- AWS SAM CLI (version 1.90.+).
 - OpenJDK (version 17.0.+). You can use SDKMAN.
 - Apache Maven (version 3.9.+) You can use SDKMAN.
 - Spring Boot (version 3.1.1)

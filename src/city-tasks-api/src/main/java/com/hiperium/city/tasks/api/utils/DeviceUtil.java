@@ -29,7 +29,7 @@ public final class DeviceUtil {
         return device;
     }
 
-    public static PutItemRequest putDeviceRequest(Device device) {
+    public static PutItemRequest createPutRequest(Device device) {
         Map<String, AttributeValue> item = new HashMap<>();
         item.put(Device.DEVICE_ID_COL, AttributeValue.builder().s(device.getId()).build());
         item.put(Device.DEVICE_NAME_COL, AttributeValue.builder().s(device.getName()).build());
@@ -41,7 +41,7 @@ public final class DeviceUtil {
                 .build();
     }
 
-    public static GetItemRequest getDeviceRequest(String id) {
+    public static GetItemRequest createGetRequest(String id) {
         Map<String, AttributeValue> key = new HashMap<>();
         key.put(Device.DEVICE_ID_COL, AttributeValue.builder().s(id).build());
         return GetItemRequest.builder()

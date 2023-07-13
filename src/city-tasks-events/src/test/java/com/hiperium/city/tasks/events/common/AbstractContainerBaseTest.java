@@ -5,6 +5,9 @@ import org.testcontainers.containers.Container;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.lambda.LambdaClient;
 
@@ -38,13 +41,16 @@ public abstract class AbstractContainerBaseTest {
                 "--runtime", "java17",
                 "--handler", "com.hiperium.city.tasks.events.ApplicationHandler::handleRequest",
                 "--region", LOCALSTACK_CONTAINER.getRegion(),
-                "--role", "arn:aws:iam::000000000000:role/test",
+                "--role", "arn:aws:iam::000000000000:role/lambda-role",
                 "--zip-file", "fileb://" + CONTAINER_JAR_PATH,
                 "--environment", "Variables={AWS_ACCESS_KEY_ID=" + LOCALSTACK_CONTAINER.getAccessKey() + ",AWS_SECRET_ACCESS_KEY=" + LOCALSTACK_CONTAINER.getSecretKey() + "}"
         );
         String lambdaEndpoint = LOCALSTACK_CONTAINER.getEndpointOverride(LocalStackContainer.Service.LAMBDA).toString();
         lambdaClient = LambdaClient.builder()
                 .region(Region.of(LOCALSTACK_CONTAINER.getRegion()))
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(LOCALSTACK_CONTAINER.getAccessKey(), LOCALSTACK_CONTAINER.getSecretKey())
+                ))
                 .endpointOverride(new URI(lambdaEndpoint))
                 .build();
     }

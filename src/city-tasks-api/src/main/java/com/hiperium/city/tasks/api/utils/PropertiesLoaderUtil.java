@@ -9,6 +9,7 @@ import java.util.Objects;
 
 public final class PropertiesLoaderUtil {
 
+    public static final String AWS_ENDPOINT_OVERRIDE = "aws.endpoint-override";
     private static final HiperiumLogger LOGGER = HiperiumLogger.getLogger(PropertiesLoaderUtil.class);
     private static final String JDBC_SQL_CONNECTION = "jdbc:postgresql://{0}:{1}/{2}";
 
@@ -17,11 +18,12 @@ public final class PropertiesLoaderUtil {
     }
 
     public static void loadProperties() throws JsonProcessingException {
-        LOGGER.info("loadProperties() - BEGIN");
+        LOGGER.debug("loadProperties() - BEGIN");
         setDatasourceConnection();
         setIdentityProviderEndpoint();
         setApplicationTimeZone();
-        LOGGER.info("loadProperties() - END");
+        setAwsEndpointOverride();
+        LOGGER.debug("loadProperties() - END");
     }
 
     public static void setDatasourceConnection() throws JsonProcessingException {
@@ -54,6 +56,14 @@ public final class PropertiesLoaderUtil {
         if (Objects.nonNull(timeZoneId) && !timeZoneId.isEmpty()) {
             LOGGER.debug("Time Zone: {}", timeZoneId);
             System.setProperty("city.tasks.time.zone", timeZoneId);
+        }
+    }
+
+    public static void setAwsEndpointOverride() {
+        String endpointOverride = EnvironmentUtil.getAwsEndpointOverride();
+        if (Objects.nonNull(endpointOverride) && !endpointOverride.isEmpty()) {
+            LOGGER.debug("AWS Endpoint-Override: {}", endpointOverride);
+            System.setProperty(AWS_ENDPOINT_OVERRIDE, endpointOverride);
         }
     }
 }

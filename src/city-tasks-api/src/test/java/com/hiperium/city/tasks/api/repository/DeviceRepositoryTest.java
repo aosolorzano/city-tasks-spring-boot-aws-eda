@@ -35,9 +35,6 @@ class DeviceRepositoryTest extends AbstractContainerBaseTest {
     public static final String DEVICE_ID = "123";
 
     @Autowired
-    private DynamoDbAsyncClient dynamoDbAsyncClient;
-
-    @Autowired
     private DeviceRepository deviceRepository;
 
     private static Task task;
@@ -48,27 +45,14 @@ class DeviceRepositoryTest extends AbstractContainerBaseTest {
                 .getDynamoDbAsyncClientBuilder(getLocalstackContainer().getEndpoint().toString())
                 .build();
         createTable(dbAsyncClient);
+        Device device = getNewDevice();
+        dbAsyncClient.putItem(DeviceUtil.createPutRequest(device));
         task = TaskUtil.getTaskTemplate();
         task.setDeviceId(DEVICE_ID);
     }
 
     @Test
     @Order(1)
-    @DisplayName("Create Device Item")
-    void givenDeviceObject_whenSave_mustSaveDeviceItem() {
-        Device device = getNewDevice();
-        Mono<PutItemResponse> putItemResponseMono = Mono.fromFuture(
-                this.dynamoDbAsyncClient.putItem(DeviceUtil.putDeviceRequest(device)));
-        StepVerifier.create(putItemResponseMono)
-                .assertNext(putItemResponse -> {
-                    assertThat(putItemResponse).isNotNull();
-                    assertThat(putItemResponse.sdkHttpResponse().isSuccessful()).isTrue();
-                })
-                .verifyComplete();
-    }
-
-    @Test
-    @Order(2)
     @DisplayName("Find Device by ID")
     void givenDeviceId_whenFindById_mustReturnDeviceItem() {
         Mono<Device> deviceMonoResponse = this.deviceRepository.findById(DEVICE_ID);
@@ -84,19 +68,19 @@ class DeviceRepositoryTest extends AbstractContainerBaseTest {
     }
 
     @Test
-    @Order(3)
+    @Order(2)
     @DisplayName("Find not existing Device ID")
     void givenDeviceId_whenFindById_mustThrowException() {
-        Mono<Device> deviceMonoResponse = this.deviceRepository.findById("100");
+        Mono<Device> deviceMonoResponse = this.deviceRepository.findById("1000");
         StepVerifier.create(deviceMonoResponse)
                 .expectError(ResourceNotFoundException.class)
                 .verify();
     }
 
     @Test
-    @Order(4)
+    @Order(3)
     @DisplayName("Turn Device OFF")
-    void givenDeviceItem_whenTaskTurnedOff_mustUpdateDeviceStatus() {
+    void givenDeviceItem_whenTaskTurnedOff_mustUpdateDeviceStatus() throws InterruptedException {
         task.setDeviceOperation(EnumDeviceOperation.DEACTIVATE);
         Mono<Task> deviceUpdateResponse = this.deviceRepository.updateStatusByTaskOperation(task);
         StepVerifier.create(deviceUpdateResponse)
@@ -106,6 +90,9 @@ class DeviceRepositoryTest extends AbstractContainerBaseTest {
                     assertThat(taskResponse.getDeviceOperation()).isEqualTo(task.getDeviceOperation());
                 })
                 .verifyComplete();
+
+        // Wait for DynamoDB to be updated
+        Thread.sleep(1000);
 
         Mono<Device> deviceResponse = this.deviceRepository.findById(DEVICE_ID);
         StepVerifier.create(deviceResponse)
@@ -120,9 +107,9 @@ class DeviceRepositoryTest extends AbstractContainerBaseTest {
     }
 
     @Test
-    @Order(5)
+    @Order(4)
     @DisplayName("Turn Device ON")
-    void givenDeviceItem_whenTaskTurnedOn_mustUpdateDeviceStatus() {
+    void givenDeviceItem_whenTaskTurnedOn_mustUpdateDeviceStatus() throws InterruptedException {
         task.setDeviceOperation(EnumDeviceOperation.ACTIVATE);
         Mono<Task> deviceUpdateResponse = this.deviceRepository.updateStatusByTaskOperation(task);
         StepVerifier.create(deviceUpdateResponse)
@@ -132,6 +119,9 @@ class DeviceRepositoryTest extends AbstractContainerBaseTest {
                     assertThat(taskResponse.getDeviceOperation()).isEqualTo(task.getDeviceOperation());
                 })
                 .verifyComplete();
+
+        // Wait for DynamoDB to be updated
+        Thread.sleep(1000);
 
         Mono<Device> deviceResponse = this.deviceRepository.findById(DEVICE_ID);
         StepVerifier.create(deviceResponse)
@@ -146,7 +136,7 @@ class DeviceRepositoryTest extends AbstractContainerBaseTest {
     }
 
     @Test
-    @Order(6)
+    @Order(5)
     @DisplayName("Update not existing Device ID")
     void givenDeviceItem_whenUpdate_mustThrowException() {
         task.setDeviceId("100");

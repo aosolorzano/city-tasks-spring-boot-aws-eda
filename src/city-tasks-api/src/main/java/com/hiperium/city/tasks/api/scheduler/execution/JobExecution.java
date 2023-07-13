@@ -13,10 +13,7 @@ import org.quartz.JobExecutionContext;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.services.eventbridge.EventBridgeClient;
-import software.amazon.awssdk.services.eventbridge.model.PutEventsRequest;
-import software.amazon.awssdk.services.eventbridge.model.PutEventsRequestEntry;
-import software.amazon.awssdk.services.eventbridge.model.PutEventsResponse;
-import software.amazon.awssdk.services.eventbridge.model.PutEventsResultEntry;
+import software.amazon.awssdk.services.eventbridge.model.*;
 
 import java.util.Objects;
 
@@ -45,8 +42,8 @@ public class JobExecution implements Job {
                 .flatMap(this.deviceRepository::updateStatusByTaskOperation)
                 .doOnNext(this::triggerCustomEvent)
                 .subscribe(
-                        result -> LOGGER.info("Job executed successfully: {}", jobId),
-                        error -> LOGGER.error("Error executing job: {}.  Error: {}", jobId, error.getMessage())
+                        result -> LOGGER.info("Job executed: {}", jobId),
+                        error -> LOGGER.error("Error executing job {}. Error: {}", jobId, error.getMessage())
                 );
     }
 
@@ -62,15 +59,19 @@ public class JobExecution implements Job {
                 .entries(entry)
                 .build();
 
-        this.eventBridgeClient.putEvents(eventRequest);
-        PutEventsResponse result = this.eventBridgeClient.putEvents(eventRequest);
-        for (PutEventsResultEntry resultEntry : result.entries()) {
-            if (Objects.nonNull(resultEntry.eventId())) {
-                LOGGER.info("Event ID: {} sent successfully to EventBridge.", resultEntry.eventId());
-            } else {
-                LOGGER.error("Error sending event to EventBridge. Error Code: {}. Error message: {}.",
-                        resultEntry.errorCode(), resultEntry.errorMessage());
+        try {
+            PutEventsResponse result = this.eventBridgeClient.putEvents(eventRequest);
+            for (PutEventsResultEntry resultEntry : result.entries()) {
+                if (Objects.nonNull(resultEntry.eventId())) {
+                    LOGGER.info("Event ID: {} sent successfully to EventBridge.", resultEntry.eventId());
+                } else {
+                    LOGGER.error("Error sending event to EventBridge. Error Code: {}. Error message: {}.",
+                            resultEntry.errorCode(), resultEntry.errorMessage());
+                }
             }
+        } catch (EventBridgeException e) {
+            LOGGER.error("Error sending event to EventBridge. Error Code: {}. Error message: {}.",
+                    e.awsErrorDetails().errorCode(), e.awsErrorDetails().errorMessage());
         }
     }
 

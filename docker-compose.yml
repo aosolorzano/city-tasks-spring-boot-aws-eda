@@ -10,7 +10,7 @@ services:
       - "4566:4566"
     volumes:
       - ./src/city-tasks-events/target/city-tasks-events-1.6.0.jar:/var/lib/localstack/city-tasks-events-1.6.0.jar
-      - ./utils/docker/localstack/dynamodb/devices.json:/var/lib/localstack/devices.json
+      - ./utils/aws/dynamodb/devices-test-data.json:/var/lib/localstack/devices.json
       - ./utils/docker/localstack/resources.sh:/etc/localstack/init/ready.d/resources-setup.sh
       - /var/run/docker.sock:/var/run/docker.sock
     networks:

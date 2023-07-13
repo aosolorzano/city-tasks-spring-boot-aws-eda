@@ -1,9 +1,10 @@
 package com.hiperium.city.tasks.api.config;
 
 import com.hiperium.city.tasks.api.logger.HiperiumLogger;
-import org.springframework.beans.factory.annotation.Value;
+import com.hiperium.city.tasks.api.utils.PropertiesLoaderUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.providers.DefaultAwsRegionProviderChain;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
@@ -17,25 +18,27 @@ public class DynamoDBClientConfig {
 
     private static final HiperiumLogger LOGGER = HiperiumLogger.getLogger(DynamoDBClientConfig.class);
 
-    @Value("${aws.endpoint-override}")
-    private String endpointOverride;
+    private final Environment environment;
+
+    public DynamoDBClientConfig(Environment environment) {
+        this.environment = environment;
+    }
 
     @Bean
     public DynamoDbAsyncClient dynamoDbAsyncClient() {
-        if (Objects.isNull(this.endpointOverride) || this.endpointOverride.isEmpty()) {
-            return DynamoDbAsyncClient.create();
-        }
-        LOGGER.debug("DynamoDB Endpoint: {}", this.endpointOverride);
-        var dynamoDbClientBuilder = getDynamoDbAsyncClientBuilder(this.endpointOverride);
+        LOGGER.info("dynamoDbAsyncClient() - START");
+        String endpointOverride = this.environment.getProperty(PropertiesLoaderUtil.AWS_ENDPOINT_OVERRIDE);
+        var dynamoDbClientBuilder = getDynamoDbAsyncClientBuilder(endpointOverride);
         return dynamoDbClientBuilder.build();
     }
 
-    public static DynamoDbAsyncClientBuilder getDynamoDbAsyncClientBuilder(String endpointOverride) {
-        var regionProvider = DefaultAwsRegionProviderChain.builder().build();
+    public static DynamoDbAsyncClientBuilder getDynamoDbAsyncClientBuilder(final String endpointOverride) {
         var dynamoDbClientBuilder = DynamoDbAsyncClient.builder()
-                .credentialsProvider(DefaultCredentialsProvider.create())
-                .region(regionProvider.getRegion());
-        dynamoDbClientBuilder.endpointOverride(URI.create(endpointOverride));
+                .region(DefaultAwsRegionProviderChain.builder().build().getRegion())
+                .credentialsProvider(DefaultCredentialsProvider.builder().build());
+        if (Objects.nonNull(endpointOverride) && !endpointOverride.isBlank()) {
+            dynamoDbClientBuilder.endpointOverride(URI.create(endpointOverride));
+        }
         return dynamoDbClientBuilder;
     }
 }

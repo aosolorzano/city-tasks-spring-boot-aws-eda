@@ -54,16 +54,18 @@ function verifyEnvironmentVariables() {
 
 helperMenu() {
   echo "
-    *************************************
-    ************ Helper Menu ************
-    *************************************
+    *********************************************
+    **************** Helper Menu ****************
+    *********************************************
     1) Revert Automated Files.
     2) Prune Docker System.
     3) Create Self-Signed Certificate.
-    4) Import Self-Signed Certificate to ACM.
-    5) Create Record Set in Route53.
-    6) Update Record Set in Route53.
-    -------------------------------------
+    4) Import Self-Signed Certificate into ACM.
+    5) Delete Self-Signed Certificate from ACM.
+    6) Create Record-Set in Route53.
+    7) Update Record-Set in Route53.
+    8) Delete Record-Set from Route53.
+    ---------------------------------------------
     r) Return.
     q) Quit.
   "
@@ -94,14 +96,24 @@ helperMenu() {
     ;;
   5)
     clear
-    export UPDATE_RECORD_SET="false"
-    sh "$WORKING_DIR"/utils/scripts/helper/5_6_register-alb-domain-in-route53.sh
+    sh "$WORKING_DIR"/utils/scripts/helper/5_delete-tls-certificate-from-acm.sh
     helperMenu
     ;;
   6)
     clear
+    export UPDATE_RECORD_SET="false"
+    sh "$WORKING_DIR"/utils/scripts/helper/6_7_register-alb-domain-in-route53.sh
+    helperMenu
+    ;;
+  7)
+    clear
     export UPDATE_RECORD_SET="true"
-    sh "$WORKING_DIR"/utils/scripts/helper/5_6_register-alb-domain-in-route53.sh
+    sh "$WORKING_DIR"/utils/scripts/helper/6_7_register-alb-domain-in-route53.sh
+    helperMenu
+    ;;
+  8)
+    clear
+    sh "$WORKING_DIR"/utils/scripts/helper/8_delete-alb-domain-from-route53.sh
     helperMenu
     ;;
   [Rr])
@@ -128,9 +140,9 @@ menu() {
     *************************************
     ************* Main Menu *************
     *************************************
-    1) Docker Compose deployment.
-    2) Create Backend on AWS.
-    3) Delete Backend on AWS.
+    1) Docker Compose.
+    2) Deploy Backend into AWS.
+    3) Delete Backend from AWS.
     -------------------------------------
     h) Helper menu.
     q) Quit.

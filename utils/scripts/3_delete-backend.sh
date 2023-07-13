@@ -1,98 +1,59 @@
 #!/bin/bash
 
-cd "$WORKING_DIR"/src/city-tasks-api || {
+cd "$WORKING_DIR" || {
   echo "Error moving to the Tasks Service directory."
   exit 1
 }
 
-### READ CSR DOMAIN NAME AND CSR SERVER FQDN
 echo ""
-read -r -p 'Enter the <Domain Name> used in your <CSR> certificate: ' server_domain_name
-if [ -z "$server_domain_name" ]; then
-  echo "Error: The <Domain Name> is required."
-  exit 1
-fi
-server_fqdn="$AWS_WORKLOADS_ENV.$server_domain_name"
-
-### ASKING TO DELETE ALB DOMAIN NAME ON ROUTE53
-read -r -p "Do you want to <delete> the ALB domain from Route53? [Y/n] " delete_alb_domain
-if [ -z "$delete_alb_domain" ]; then
-  read -r -p 'Enter the <AWS Profile> to deletion the <Record Set>: [default] ' aws_profile
-  if [ -z "$aws_workloads_profile" ]; then
-    AWS_ROUTE53_PROFILE='default'
-  else
-    AWS_ROUTE53_PROFILE=$aws_profile
-  fi
-fi
-
-echo ""
-echo "GETTING INFORMATION FROM AWS. PLEASE WAIT..."
-
-### VERIFY AWS PROFILE NAME
-if [ -z "$AWS_WORKLOADS_PROFILE" ]; then
-  echo ""
-  echo "You must specify the AWS profile before delete the resources."
-  exit 1
-fi
-alb_domain_name=$(aws cloudformation describe-stacks --stack-name city-tasks-"$AWS_WORKLOADS_ENV" \
-  --query "Stacks[0].Outputs[?OutputKey=='PublicLoadBalancerDNSName'].OutputValue" \
-  --output text \
+echo "REMOVING EVENTBRIDGE POLICY FROM ECS TASK ROLE..."
+ecs_task_role_name=$(aws iam list-roles --output text \
+  --query "Roles[?contains(RoleName, 'city-tasks-$AWS_WORKLOADS_ENV-api-TaskRole')].[RoleName]" \
   --profile "$AWS_WORKLOADS_PROFILE")
+if [ -z "$ecs_task_role_name" ]; then
+  echo ""
+  echo "WARNING: ECS Task Role was not found with name: 'city-tasks-$AWS_WORKLOADS_ENV-api'."
+  echo "         Please, remove the following IAM-Policy from the ECS Task Role manually:"
+  echo ""
+  echo "         city-tasks-$AWS_WORKLOADS_ENV-api-EventBridge-PutPolicy"
+  echo ""
+else
+  aws iam delete-role-policy              \
+      --role-name "$ecs_task_role_name"   \
+      --policy-name "city-tasks-$AWS_WORKLOADS_ENV-api-EventBridge-PutPolicy" \
+      --profile "$AWS_WORKLOADS_PROFILE"
+  echo "DONE!"
+fi
 
 echo ""
-echo "DELETING COPILOT APP FROM AWS..."
+echo "DELETING COPILOT APPLICATION FROM AWS..."
 copilot app delete --yes
 echo ""
 echo "DONE!"
 
-### DELETE ACM CERTIFICATE
 echo ""
-echo "DELETING ACM CERTIFICATE FROM AWS..."
-acm_arn=$(aws acm list-certificates   \
-  --includes keyTypes=EC_prime256v1   \
-  --profile "$AWS_WORKLOADS_PROFILE"  \
-  --output text \
-  --query "CertificateSummaryList[?contains(DomainName, '$server_domain_name')].[CertificateArn]")
-if [ -z "$acm_arn" ]; then
-  echo ""
-  echo "WARNING: Not ACM Certificate found to delete. You must delete it manually."
-else
-  aws acm delete-certificate      \
-    --certificate-arn "$acm_arn"  \
+echo "DELETING PENDING LOG-GROUPS FROM CLOUDWATCH..."
+echo ""
+aws logs describe-log-groups --output text \
+  --query "logGroups[?contains(logGroupName, 'city-tasks-$AWS_WORKLOADS_ENV-api')].[logGroupName]" \
+  --profile "$AWS_WORKLOADS_PROFILE" | while read -r log_group_name; do
+  echo "Deleting log-group: $log_group_name"
+  aws logs delete-log-group             \
+    --log-group-name "$log_group_name"  \
     --profile "$AWS_WORKLOADS_PROFILE"
-  echo "DONE!"
-fi
-
-### DELETE RECORD SET FROM ROUTE53
+done
 echo ""
-echo "DELETING RECORD SET FROM ROUTE53..."
-hosted_zone_id=$(aws route53 list-hosted-zones-by-name \
-  --dns-name "$server_domain_name" \
-  --profile "$AWS_ROUTE53_PROFILE" \
-  --output text \
-  --query "HostedZones[?contains(Name, '$server_domain_name')].[Id]")
-if [ -z "$hosted_zone_id" ]; then
-  echo ""
-  echo "WARNING: Not Hosted Zone found on Route53. You must delete it manually."
-else
-  cat "$WORKING_DIR"/utils/templates/route53/tasks-api-delete-alb-record-set.json > "$WORKING_DIR"/aws/route53/tasks-api-delete-alb-record-set.json
-  sed -i'.bak' -e "s/server-name-fqdn/$server_fqdn/g; s/alb-domain-name/$alb_domain_name/g" \
-        "$WORKING_DIR"/utils/aws/route53/tasks-api-delete-alb-record-set.json
-  rm -f "$WORKING_DIR"/utils/aws/route53/tasks-api-delete-alb-record-set.json.bak
-  hosted_zone_id=$(echo "$hosted_zone_id" | cut -d'/' -f3)
-  aws route53 change-resource-record-sets \
-    --hosted-zone-id "$hosted_zone_id" \
-    --change-batch file://"$WORKING_DIR"/utils/aws/route53/tasks-api-delete-alb-record-set.json \
-    --profile "$AWS_ROUTE53_PROFILE"
-  echo "DONE!"
-fi
+echo "DONE!"
 
-### DELETE SAM-PROJECT
+echo ""
+echo "DELETING SAM APPLICATION FROM AWS..."
 sam delete                              \
   --stack-name city-tasks-events        \
   --config-env "$AWS_WORKLOADS_ENV"     \
   --no-prompts                          \
   --profile "$AWS_WORKLOADS_PROFILE"
 
-### REVERT CONFIGURATION FILES
+### REVERTING CONFIGURATION FILES
 sh "$WORKING_DIR"/utils/scripts/helper/1_revert-automated-scripts.sh
+echo ""
+echo "DONE!"

@@ -1,16 +1,16 @@
 package com.hiperium.city.tasks.api.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.hiperium.city.tasks.api.logger.HiperiumLogger;
 import com.hiperium.city.tasks.api.vo.AuroraSecretsVo;
+import lombok.extern.slf4j.Slf4j;
 
 import java.text.MessageFormat;
 import java.util.Objects;
 
+@Slf4j
 public final class PropertiesLoaderUtil {
 
     public static final String AWS_ENDPOINT_OVERRIDE = "aws.endpoint-override";
-    private static final HiperiumLogger LOGGER = HiperiumLogger.getLogger(PropertiesLoaderUtil.class);
     private static final String JDBC_SQL_CONNECTION = "jdbc:postgresql://{0}:{1}/{2}";
 
     private PropertiesLoaderUtil() {
@@ -18,12 +18,10 @@ public final class PropertiesLoaderUtil {
     }
 
     public static void loadProperties() throws JsonProcessingException {
-        LOGGER.debug("loadProperties() - BEGIN");
         setDatasourceConnection();
         setIdentityProviderEndpoint();
         setApplicationTimeZone();
         setAwsEndpointOverride();
-        LOGGER.debug("loadProperties() - END");
     }
 
     public static void setDatasourceConnection() throws JsonProcessingException {
@@ -31,7 +29,7 @@ public final class PropertiesLoaderUtil {
         if (Objects.nonNull(auroraSecretVO)) {
             String sqlConnection = MessageFormat.format(JDBC_SQL_CONNECTION, auroraSecretVO.host(),
                     auroraSecretVO.port(), auroraSecretVO.dbname());
-            LOGGER.debug("JDBC Connection: {}", sqlConnection);
+            log.debug("JDBC Connection: {}", sqlConnection);
             // Set Datasource connection for JPA.
             System.setProperty("spring.datasource.url", sqlConnection);
             System.setProperty("spring.datasource.username", auroraSecretVO.username());
@@ -46,7 +44,7 @@ public final class PropertiesLoaderUtil {
     public static void setIdentityProviderEndpoint() {
         String idpEndpoint = EnvironmentUtil.getIdpEndpoint();
         if (Objects.nonNull(idpEndpoint) && !idpEndpoint.isEmpty()) {
-            LOGGER.debug("IdP URI: {}", idpEndpoint);
+            log.debug("IdP URI: {}", idpEndpoint);
             System.setProperty("spring.security.oauth2.resourceserver.jwt.issuer-uri", idpEndpoint);
         }
     }
@@ -54,7 +52,7 @@ public final class PropertiesLoaderUtil {
     public static void setApplicationTimeZone() {
         String timeZoneId = EnvironmentUtil.getTimeZone();
         if (Objects.nonNull(timeZoneId) && !timeZoneId.isEmpty()) {
-            LOGGER.debug("Time Zone: {}", timeZoneId);
+            log.debug("Time Zone: {}", timeZoneId);
             System.setProperty("city.tasks.time.zone", timeZoneId);
         }
     }
@@ -62,7 +60,7 @@ public final class PropertiesLoaderUtil {
     public static void setAwsEndpointOverride() {
         String endpointOverride = EnvironmentUtil.getAwsEndpointOverride();
         if (Objects.nonNull(endpointOverride) && !endpointOverride.isEmpty()) {
-            LOGGER.debug("AWS Endpoint-Override: {}", endpointOverride);
+            log.debug("AWS Endpoint-Override: {}", endpointOverride);
             System.setProperty(AWS_ENDPOINT_OVERRIDE, endpointOverride);
         }
     }

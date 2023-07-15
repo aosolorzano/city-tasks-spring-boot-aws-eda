@@ -1,6 +1,5 @@
 package com.hiperium.city.tasks.api.config;
 
-import com.hiperium.city.tasks.api.logger.HiperiumLogger;
 import com.hiperium.city.tasks.api.utils.PropertiesLoaderUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,8 +15,6 @@ import java.util.Objects;
 @Configuration
 public class DynamoDBClientConfig {
 
-    private static final HiperiumLogger LOGGER = HiperiumLogger.getLogger(DynamoDBClientConfig.class);
-
     private final Environment environment;
 
     public DynamoDBClientConfig(Environment environment) {
@@ -26,7 +23,6 @@ public class DynamoDBClientConfig {
 
     @Bean
     public DynamoDbAsyncClient dynamoDbAsyncClient() {
-        LOGGER.info("dynamoDbAsyncClient() - START");
         String endpointOverride = this.environment.getProperty(PropertiesLoaderUtil.AWS_ENDPOINT_OVERRIDE);
         var dynamoDbClientBuilder = getDynamoDbAsyncClientBuilder(endpointOverride);
         return dynamoDbClientBuilder.build();

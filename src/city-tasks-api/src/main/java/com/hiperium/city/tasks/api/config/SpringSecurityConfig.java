@@ -1,6 +1,5 @@
 package com.hiperium.city.tasks.api.config;
 
-import com.hiperium.city.tasks.api.logger.HiperiumLogger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,14 +15,11 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebFluxSecurity
 public class SpringSecurityConfig {
 
-    private static final HiperiumLogger LOGGER = HiperiumLogger.getLogger(SpringSecurityConfig.class);
-
     @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
     private String issuerUri;
 
     @Bean
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
-        LOGGER.debug("securityFilterChain() - START");
         http.csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers("/actuator/**").permitAll()
@@ -35,7 +31,6 @@ public class SpringSecurityConfig {
     // Used for Spring Native compatibility with "WebFluxSecurityConfiguration" component.
     @Bean
     public ReactiveJwtDecoder jwtDecoder() {
-        LOGGER.debug("jwtDecoder() - START: {}", this.issuerUri);
         return ReactiveJwtDecoders.fromIssuerLocation(this.issuerUri);
     }
 }

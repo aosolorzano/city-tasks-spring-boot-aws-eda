@@ -3,11 +3,11 @@ package com.hiperium.city.tasks.api.scheduler.execution;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hiperium.city.tasks.api.dto.TaskEventDto;
-import com.hiperium.city.tasks.api.logger.HiperiumLogger;
 import com.hiperium.city.tasks.api.model.Task;
 import com.hiperium.city.tasks.api.repository.DeviceRepository;
 import com.hiperium.city.tasks.api.repository.TaskRepository;
 import com.hiperium.city.tasks.api.utils.SchedulerUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.springframework.stereotype.Component;
@@ -17,10 +17,9 @@ import software.amazon.awssdk.services.eventbridge.model.*;
 
 import java.util.Objects;
 
+@Slf4j
 @Component
 public class JobExecution implements Job {
-
-    private static final HiperiumLogger LOGGER = HiperiumLogger.getLogger(JobExecution.class);
 
     private final TaskRepository taskRepository;
     private final DeviceRepository deviceRepository;
@@ -35,15 +34,15 @@ public class JobExecution implements Job {
 
     @Override
     public void execute(final JobExecutionContext context) {
-        LOGGER.debug("execute() - START");
+        log.debug("execute() - START");
         final String jobId = context.getJobDetail().getJobDataMap().getString(SchedulerUtil.TASK_JOB_ID_DATA_KEY);
         Mono.just(jobId)
                 .map(this.taskRepository::findByJobId)
                 .flatMap(this.deviceRepository::updateStatusByTaskOperation)
                 .doOnNext(this::triggerCustomEvent)
                 .subscribe(
-                        result -> LOGGER.info("Job executed: {}", jobId),
-                        error -> LOGGER.error("Error executing job {}. Error: {}", jobId, error.getMessage())
+                        result -> log.info("Job executed: {}", jobId),
+                        error -> log.error("Error executing job {}. Error: {}", jobId, error.getMessage())
                 );
     }
 
@@ -63,14 +62,14 @@ public class JobExecution implements Job {
             PutEventsResponse result = this.eventBridgeClient.putEvents(eventRequest);
             for (PutEventsResultEntry resultEntry : result.entries()) {
                 if (Objects.nonNull(resultEntry.eventId())) {
-                    LOGGER.info("Event ID: {} sent successfully to EventBridge.", resultEntry.eventId());
+                    log.info("Event ID: {} sent successfully to EventBridge.", resultEntry.eventId());
                 } else {
-                    LOGGER.error("Error sending event to EventBridge. Error Code: {}. Error message: {}.",
+                    log.error("Error sending event to EventBridge. Error Code: {}. Error message: {}.",
                             resultEntry.errorCode(), resultEntry.errorMessage());
                 }
             }
         } catch (EventBridgeException e) {
-            LOGGER.error("Error sending event to EventBridge. Error Code: {}. Error message: {}.",
+            log.error("Error sending event to EventBridge. Error Code: {}. Error message: {}.",
                     e.awsErrorDetails().errorCode(), e.awsErrorDetails().errorMessage());
         }
     }
@@ -84,7 +83,7 @@ public class JobExecution implements Job {
                     .detail(objectMapper.writeValueAsString(taskEventDto))
                     .build();
         } catch (JsonProcessingException e) {
-            LOGGER.error("Error serializing Task Event: {}.", e.getMessage());
+            log.error("Error serializing Task Event: {}.", e.getMessage());
             throw new IllegalArgumentException(e.getMessage(), e);
         }
         return entry;

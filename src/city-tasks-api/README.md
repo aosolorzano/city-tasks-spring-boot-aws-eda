@@ -1,14 +1,27 @@
 
-## Running Locally using Native Executable.
-Use this option if you want to explore more features such as running your tests in a native image.
-*IMPORTANT:* The GraalVM `native-image` compiler should be installed and configured on your machine.
+### Running Locally using Docker Compose.
 
-Deploy the required services using Docker Compose command:
+Use this option if you want to explore more features such as running your tests in a native image.
+
+*IMPORTANT:* The GraalVM `native-image` compiler should be installed and configured on your machine.
+*IMPORTANT:* If you're experiencing JMV memory issues, execute the following commands to increase the JVM memory and execute Maven with more CPU cores:
+```bash
+export _JAVA_OPTIONS="-Xmx8g -Xms4g"
+mvn -T 2C clean native:compile -Pnative -DskipTests -f src/city-tasks-api/pom.xml -Ddependency-check.skip=true
+```
+
+Package the Lambda Function:
+```bash
+mvn clean package -DskipTests -f src/city-tasks-events/pom.xml
+```
+
+Deploy the dependent services using Docker Compose:
 ```bash
 docker compose up tasks-localstack tasks-postgres
 ```
 
 Open a new terminal window and export the following environment variables:
+*IMPORTANT:* Replace the `<your_cognito_region>` and `<your_cognito_user_pool_id>` with your own values.
 ```bash
 export SPRING_PROFILES_ACTIVE=dev
 export CITY_TASKS_DB_CLUSTER_SECRET='{"dbClusterIdentifier":"city-tasks-db-cluster","password":"postgres123","dbname":"CityTasksDB","engine":"postgres","port":5432,"host":"localhost","username":"postgres"}'
@@ -19,18 +32,31 @@ export AWS_ACCESS_KEY_ID='DUMMY'
 export AWS_SECRET_ACCESS_KEY='DUMMY'
 export AWS_ENDPOINT_OVERRIDE='http://localhost:4566'
 ```
-
 Then, run the Spring Boot microservice from the project's root directory:
 ```bash
-$ mvn clean spring-boot:run -f src/city-tasks-api/pom.xml
+mvn clean spring-boot:run -DskipTests -f src/city-tasks-api/pom.xml
 ```
 
-Or, create and run the native executable:
+### Running Locally using Native Executable.
+
+The process is the same as before, but you need to compile the native executable instead using the `spring-boot:run` directive:
 ```bash
-$ mvn clean native:compile -Pnative spring-boot:run -f src/city-tasks-api/pom.xml
+mvn clean native:compile -Pnative -DskipTests -f src/city-tasks-api/pom.xml
+```
+Then, you can run the native executable as follows:
+```bash
+sh -c "src/city-tasks-api/target/city-tasks-api"
 ```
 
-### AWS Copilot CLI - Helpful Commands.
+### Running Integration Tests in a Native Image.
+
+You can also run your existing tests suite in a native image.
+This is an efficient way to validate the compatibility of your application:
+```bash
+mvn -T 2C test -PnativeTest -f src/city-tasks-api/pom.xml
+```
+
+### AWS Copilot CLI Helpful Commands.
 
 List all of your AWS Copilot applications.
 ```bash

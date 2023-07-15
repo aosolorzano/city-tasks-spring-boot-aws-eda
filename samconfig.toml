@@ -4,7 +4,7 @@ version = 0.1
 
 [dev]
 [dev.global.parameters]
-stack_name = "city-tasks-events"
+stack_name = "city-tasks-events-dev"
 
 [dev.build.parameters]
 cached = false

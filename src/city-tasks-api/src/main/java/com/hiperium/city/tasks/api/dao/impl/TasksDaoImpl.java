@@ -4,21 +4,20 @@ import com.hiperium.city.tasks.api.dao.TasksDao;
 import com.hiperium.city.tasks.api.dto.TaskCriteriaDto;
 import com.hiperium.city.tasks.api.dto.TaskDto;
 import com.hiperium.city.tasks.api.exception.ValidationException;
-import com.hiperium.city.tasks.api.logger.HiperiumLogger;
 import com.hiperium.city.tasks.api.model.Task;
 import com.hiperium.city.tasks.api.utils.enums.EnumValidationError;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 @Repository
 public class TasksDaoImpl implements TasksDao {
-
-    private static final HiperiumLogger LOGGER = HiperiumLogger.getLogger(TasksDaoImpl.class);
 
     private final EntityManager entityManager;
 
@@ -27,7 +26,7 @@ public class TasksDaoImpl implements TasksDao {
     }
 
     public List<TaskDto> find(final TaskCriteriaDto criteriaDto) {
-        LOGGER.debug("find() - START: {}", criteriaDto);
+        log.debug("find() - START: {}", criteriaDto);
         CriteriaBuilder cb = this.entityManager.getCriteriaBuilder();
         CriteriaQuery<TaskDto> cq = cb.createQuery(TaskDto.class);
         Root<Task> taskRoot = cq.from(Task.class);

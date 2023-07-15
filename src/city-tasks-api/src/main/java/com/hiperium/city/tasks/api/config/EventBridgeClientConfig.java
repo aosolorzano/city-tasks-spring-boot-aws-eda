@@ -1,6 +1,5 @@
 package com.hiperium.city.tasks.api.config;
 
-import com.hiperium.city.tasks.api.logger.HiperiumLogger;
 import com.hiperium.city.tasks.api.utils.PropertiesLoaderUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,8 +14,6 @@ import java.util.Objects;
 @Configuration
 public class EventBridgeClientConfig {
 
-    private static final HiperiumLogger LOGGER = HiperiumLogger.getLogger(EventBridgeClientConfig.class);
-
     private final Environment environment;
 
     public EventBridgeClientConfig(Environment environment) {
@@ -25,7 +22,6 @@ public class EventBridgeClientConfig {
 
     @Bean
     public EventBridgeClient eventBridgeClient() {
-        LOGGER.info("eventBridgeClient() - START");
         var eventBridgeClientBuilder = EventBridgeClient.builder()
                 .region(DefaultAwsRegionProviderChain.builder().build().getRegion())
                 .credentialsProvider(DefaultCredentialsProvider.builder().build());

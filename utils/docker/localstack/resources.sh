@@ -43,7 +43,7 @@ awslocal lambda create-function                         \
   --architectures 'arm64'                               \
   --role 'arn:aws:iam::000000000000:role/lambda-role'   \
   --handler 'com.hiperium.city.tasks.events.ApplicationHandler::handleRequest' \
-  --zip-file fileb:///var/lib/localstack/city-tasks-events-1.6.0.jar
+  --zip-file fileb:///var/lib/localstack/city-tasks-events.jar
 
 echo ""
 echo "CREATING FUNCTION URL..."

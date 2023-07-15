@@ -13,12 +13,12 @@ parallel = true
 [dev.validate.parameters]
 lint = true
 
+[dev.package.parameters]
+resolve_s3 = true
+
 [dev.deploy.parameters]
 capabilities = "CAPABILITY_IAM"
 confirm_changeset = true
-resolve_s3 = true
-
-[dev.package.parameters]
 resolve_s3 = true
 
 [dev.sync.parameters]

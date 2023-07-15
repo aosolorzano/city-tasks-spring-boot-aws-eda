@@ -22,7 +22,7 @@ public abstract class AbstractContainerBaseTest {
     protected static final LocalStackContainer LOCALSTACK_CONTAINER;
     protected static LambdaClient lambdaClient;
 
-    public static final String CONTAINER_JAR_PATH = "/tmp/localstack/city-tasks-events-1.6.0.jar";
+    public static final String CONTAINER_JAR_PATH = "/tmp/localstack/city-tasks-events.jar";
 
     static {
         LOCALSTACK_CONTAINER = new LocalStackContainer(DockerImageName.parse("localstack/localstack:latest"))

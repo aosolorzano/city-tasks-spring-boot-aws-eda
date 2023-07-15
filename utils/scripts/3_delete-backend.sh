@@ -5,6 +5,7 @@ cd "$WORKING_DIR" || {
   exit 1
 }
 
+### REMOVING EVENTBRIDGE RULE POLICY TO AVOID ERRORS WHEN DELETING THE COPILOT CLI STACK
 echo ""
 echo "REMOVING EVENTBRIDGE POLICY FROM ECS TASK ROLE..."
 ecs_task_role_name=$(aws iam list-roles --output text \
@@ -42,16 +43,20 @@ aws logs describe-log-groups --output text \
     --log-group-name "$log_group_name"  \
     --profile "$AWS_WORKLOADS_PROFILE"
 done
+aws logs delete-log-group                                       \
+    --log-group-name "city-tasks-$AWS_WORKLOADS_ENV-FlowLogs"   \
+    --profile "$AWS_WORKLOADS_PROFILE"
 echo ""
 echo "DONE!"
 
 echo ""
 echo "DELETING SAM APPLICATION FROM AWS..."
-sam delete                              \
-  --stack-name city-tasks-events        \
-  --config-env "$AWS_WORKLOADS_ENV"     \
-  --no-prompts                          \
+sam delete                                                \
+  --stack-name city-tasks-events-"$AWS_WORKLOADS_ENV"     \
+  --config-env "$AWS_WORKLOADS_ENV"                       \
+  --no-prompts                                            \
   --profile "$AWS_WORKLOADS_PROFILE"
+rm -rf "$WORKING_DIR"/.aws-sam
 
 ### REVERTING CONFIGURATION FILES
 sh "$WORKING_DIR"/utils/scripts/helper/1_revert-automated-scripts.sh

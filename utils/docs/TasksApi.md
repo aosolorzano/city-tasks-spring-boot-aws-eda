@@ -1,3 +1,12 @@
+## city-tasks-api
+
+This project contains source code and supporting files for a containerized application that you can deploy with the Copilot CLI. It includes the following files and folders.
+
+- src/main                     - Code for the container application.
+- src/test                     - Integration tests for the application code.
+- src/main/resources           - Spring Boot configuration files.
+
+This application manages Quartz Jobs with the help of Spring Webflux and Spring Native.
 
 ### Running Locally using Docker Compose.
 

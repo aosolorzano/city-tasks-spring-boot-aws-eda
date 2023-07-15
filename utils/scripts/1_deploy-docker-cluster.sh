@@ -39,7 +39,7 @@ esac
 echo ""
 echo "GENERATING LAMBDA FUNCTION JAR..."
 echo ""
-mvn clean package -DskipTests -f "$WORKING_DIR"/src/city-tasks-events/pom.xml
+mvn clean install -DskipTests -f "$WORKING_DIR"/src/city-tasks-events/pom.xml
 echo ""
 echo "DONE!"
 

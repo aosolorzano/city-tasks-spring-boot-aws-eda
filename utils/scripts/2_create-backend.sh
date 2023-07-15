@@ -91,6 +91,13 @@ echo ""
 echo "DONE!"
 
 echo ""
+echo "GENERATING LAMBDA FUNCTION JAR..."
+echo ""
+mvn clean install -DskipTests -f "$WORKING_DIR"/src/city-tasks-events/pom.xml
+echo ""
+echo "DONE!"
+
+echo ""
 echo "BUILDING SAM PROJECT..."
 sam build --config-env "$AWS_WORKLOADS_ENV"
 

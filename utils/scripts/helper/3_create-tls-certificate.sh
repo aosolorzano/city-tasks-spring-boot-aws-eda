@@ -10,6 +10,7 @@ CERTS_DIR="$WORKING_DIR"/utils/certs
 echo ""
 if [ ! -f "$CERTS_DIR"/ca-key.pem ] || [ ! -f "$CERTS_DIR"/ca-cert.pem ]; then
   rm -f ./*.pem
+  rm -f ./*.srl
   read -r -p 'Enter the <Domain Name> for your CA (Intermediate) certificate: ' ca_domain_name
   if [ -z "$ca_domain_name" ]; then
     echo "Error: You must enter a valid <Domain Name> for your CA certificate."
@@ -41,8 +42,7 @@ if [ ! -f "$CERTS_DIR"/server-key.pem ] || [ ! -f "$CERTS_DIR"/server-cert.pem ]
     -outform PEM
   openssl req -new -sha256        \
     -key server-key.pem           \
-    -out server-cert.pem          \
-    -days 365                     \
+    -out server-cert.pem                     \
     -subj "/C=EC/ST=Pichincha/L=UIO/O=Hiperium Cloud/OU=Engineering/CN=$server_domain_name/emailAddress=support@$server_domain_name"
   ### REMOVING HEADER FROM CSR PRIVATE KEY
   openssl ec -in server-key.pem -outform PEM -out server-key-no-header.pem
@@ -66,6 +66,6 @@ mkdir -p "$WORKING_DIR"/utils/certs/"$AWS_WORKLOADS_ENV"
 
 ### MOVING CERTIFICATE FILES TO THE CORRESPONDING DIRECTORY
 cp server-key-no-header.pem "$WORKING_DIR"/utils/certs/"$AWS_WORKLOADS_ENV"/server-key.pem
-mv server-cert-"$AWS_WORKLOADS_ENV".pem ca-cert.srl "$WORKING_DIR"/utils/certs/"$AWS_WORKLOADS_ENV"
+mv server-cert-"$AWS_WORKLOADS_ENV".pem "$WORKING_DIR"/utils/certs/"$AWS_WORKLOADS_ENV"
 echo ""
 echo "DONE!"

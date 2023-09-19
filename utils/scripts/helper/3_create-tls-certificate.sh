@@ -44,8 +44,8 @@ if [ ! -f "$CERTS_DIR"/server-key.pem ] || [ ! -f "$CERTS_DIR"/server-cert.pem ]
     -out server-cert.pem          \
     -days 365                     \
     -subj "/C=EC/ST=Pichincha/L=UIO/O=Hiperium Cloud/OU=Engineering/CN=$server_domain_name/emailAddress=support@$server_domain_name"
-    ### REMOVING HEADER FROM CSR PRIVATE KEY
-    openssl ec -in server-key.pem -outform PEM -out server-key-no-header.pem
+  ### REMOVING HEADER FROM CSR PRIVATE KEY
+  openssl ec -in server-key.pem -outform PEM -out server-key-no-header.pem
 fi
 
 echo ""
@@ -65,7 +65,6 @@ openssl x509 -req -sha256       \
 mkdir -p "$WORKING_DIR"/utils/certs/"$AWS_WORKLOADS_ENV"
 
 ### MOVING CERTIFICATE FILES TO THE CORRESPONDING DIRECTORY
-cp ca-cert.pem "$WORKING_DIR"/utils/certs
 cp server-key-no-header.pem "$WORKING_DIR"/utils/certs/"$AWS_WORKLOADS_ENV"/server-key.pem
 mv server-cert-"$AWS_WORKLOADS_ENV".pem ca-cert.srl "$WORKING_DIR"/utils/certs/"$AWS_WORKLOADS_ENV"
 echo ""
